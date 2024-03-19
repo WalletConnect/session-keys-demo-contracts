@@ -5,6 +5,7 @@ import { IModule, IValidator, VALIDATION_SUCCESS, VALIDATION_FAILED } from "erc7
 import { EncodedModuleTypes } from "./lib/ModuleTypeLib.sol";
 import { PackedUserOperation } from "account-abstraction/interfaces/PackedUserOperation.sol";
 import {_packValidationData} from "account-abstraction/core/Helpers.sol";
+import { ISigValidationAlgorithm } from "./SigValidation/ISigValidationAlgorithm.sol";
 
 type ValidAfter is uint48;
 type ValidUntil is uint48;
@@ -34,7 +35,7 @@ contract ERC7579PermissionsValidator is IValidator {
         returns (uint256 validationData)
     {
         if (_isBatchExecuteCall(userOp)) {
-            // TODO: Add bathed execution later, use just single for demo purposes
+            // TODO: Add batched execution later, use just single for demo purposes
             //validationData = _validateUserOpBatchExecute(userOp, userOpHash);
             revert("Permissions: Batch Execution SOON (tm)");
         } else {
@@ -130,9 +131,6 @@ contract ERC7579PermissionsValidator is IValidator {
                 )
             );
 
-            // TODO: use the trick to convert memory to calldata as of now
-            // when it is done via assembly, it will become calldata naturally
-
             _verifyPermissionEnableDataSignature(
                 permissionEnableData,
                 permissionEnableSignature, // it should contain data of the existing permission that signed the enabling of the new permission
@@ -154,10 +152,16 @@ contract ERC7579PermissionsValidator is IValidator {
 
             // now let's use it
 
-            // 1. TODO: iterate over Policies to see if none of them are violated    
+            // 1. TODO: iterate over Policies to see if none of them are violated   
+            // pretend permissions are not violated :) 
             bool arePermissionsViolated = false;
+
             // 2. check that it was actually signed by a proper signer (session key)
-            signerSignature;
+            // revert if they have been violated
+            ISigValidationAlgorithm(signatureValidationAlgorithm).validateSignature(
+                userOpHash,
+                signerSignature,
+                signer);
 
             rv = _packValidationData(
                 //_packValidationData expects true if sig validation has failed, false otherwise

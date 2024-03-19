@@ -8,7 +8,28 @@ import {Execution, ExecutionLib} from "erc7579/lib/ExecutionLib.sol";
 import {IEntryPoint} from "account-abstraction/interfaces/IEntryPoint.sol";
 import {IERC7579Account} from "erc7579/interfaces/IERC7579Account.sol";
 
+/*
+ TODO: nonces
+ TODO: renounce permissions (including that is not enabled yet)
+*/
+
 contract BiconomyUserOpConstructor is IUserOpConstructor {
+
+    /**
+     *    PermissionContext is a bytes array with abi.encode:
+     *    1. PermissionValidator address (20 bytes)
+     *    2. PermissionData as per the Std7579PermissionsModule:
+            uint256 permissionIndex,
+            uint48 validUntil,
+            uint48 validAfter,
+            address signatureValidationAlgorithm,
+            bytes memory signer,
+            address policy,
+            bytes memory policyData,
+            bytes memory permissionEnableData,
+            bytes memory permissionEnableSignature,
+            bytes memory signerSignature
+     */
 
     IEntryPoint public immutable entryPoint;
 
@@ -85,7 +106,5 @@ contract BiconomyUserOpConstructor is IUserOpConstructor {
                 userOp.signature
             );
         }
-
-        
     }
 }
