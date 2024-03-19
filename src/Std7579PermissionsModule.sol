@@ -36,6 +36,7 @@ contract ERC7579PermissionsValidator is IValidator {
         if (_isBatchExecuteCall(userOp)) {
             // TODO: Add bathed execution later, use just single for demo purposes
             //validationData = _validateUserOpBatchExecute(userOp, userOpHash);
+            revert("Permissions: Batch Execution SOON (tm)");
         } else {
             validationData = _validateUserOpSingleExecute(userOp, userOpHash);
         }
@@ -119,10 +120,17 @@ contract ERC7579PermissionsValidator is IValidator {
                 ValidAfter.unwrap(validAfter)
             );
         } else {
+            /*
             (
                 bytes32 permissionDataDigest_,
                 bytes calldata signerSignature
             ) = _parsePermissionDataPreEnabledSignatureSingleCall(userOp.signature);
+            */
+            // just doing it with abi.decode for consistency
+            (
+                bytes32 permissionDataDigest_,
+                bytes memory signerSignature
+            ) = abi.decode(userOp.signature, (bytes32, bytes));
 
             SingleSignerPermission storage permission = _validatePermissionPreEnabled(
                 userOp.sender,
