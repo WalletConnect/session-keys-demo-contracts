@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 import {IUserOpConstructor, PackedUserOperation} from "./IUserOperationConstructor.sol";
+import {IPermissionChecker} from "../interfaces/IPermissionChecker.sol";
 import {ModeLib} from "erc7579/lib/ModeLib.sol";
 import {Execution, ExecutionLib} from "erc7579/lib/ExecutionLib.sol";
 import {IEntryPoint} from "account-abstraction/interfaces/IEntryPoint.sol";
@@ -19,8 +20,8 @@ contract BiconomyUserOpConstructor is IUserOpConstructor {
         address smartAccount,
 		bytes calldata permissionsContext
 	) external view returns (uint256 nonce) {
-        address validator = address(bytes20(permissionsContext[0:20]));
-        uint192 key = uint192(bytes24(bytes20(address(validator))));
+        address permissionValidator = address(bytes20(permissionsContext[0:20]));
+        uint192 key = uint192(bytes24(bytes20(address(permissionValidator))));
         nonce = entryPoint.getNonce(address(smartAccount), key);
     }
   
@@ -57,13 +58,34 @@ contract BiconomyUserOpConstructor is IUserOpConstructor {
     }
     
     function getSignatureWithContext(
-	  address /* smartAccount */,
+	  address smartAccount,
 	  PackedUserOperation calldata userOp,
       bytes calldata permissionsContext
-	) external pure returns (bytes memory signature) {
-        signature = abi.encode(
-            permissionsContext[20:],
-            userOp.signature //raw signature
-        );
+	) external view returns (bytes memory signature) {
+
+        address permissionValidator = address(bytes20(permissionsContext[0:20]));
+
+        // What if permission has already been set?
+        bytes32 result = IPermissionChecker(permissionValidator).
+            checkPermissionForSmartAccount(
+                smartAccount,
+                permissionsContext[20:]
+            );
+
+        if(result == keccak256("Permission Not Enabled")) {
+            // just use the full data required to enable the permission
+            signature = abi.encode(
+                permissionsContext[20:],
+                userOp.signature
+            );
+        } else {
+            // just use the permissionId returned as result
+            signature = abi.encode(
+                result,
+                userOp.signature
+            );
+        }
+
+        
     }
 }

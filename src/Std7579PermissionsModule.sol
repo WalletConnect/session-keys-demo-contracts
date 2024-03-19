@@ -42,6 +42,52 @@ contract ERC7579PermissionsValidator is IValidator {
         }
     }
 
+    function checkPermissionForSmartAccount(
+        address smartAccount,
+        bytes calldata permissionDataFromContext
+    ) external view returns (bytes32 permissionPrefix) {
+        (
+                /*uint256 permissionIndex*/,
+                ValidUntil validUntil,
+                ValidAfter validAfter,
+                address signatureValidationAlgorithm,
+                bytes memory signer,
+                address policy,
+                bytes memory policyData,
+                /*bytes memory permissionEnableData*/
+                ,
+                /*bytes memory permissionEnableSignature*/
+            ) = abi.decode(permissionDataFromContext, 
+                (
+                    uint256,
+                    ValidUntil,
+                    ValidAfter,
+                    address,
+                    bytes,
+                    address,
+                    bytes,
+                    bytes,
+                    bytes
+                )
+            );
+
+            bytes32 permissionId = _getPermissionDataDigestFromUnpacked(
+                validUntil,
+                validAfter,
+                signatureValidationAlgorithm,
+                signer,
+                policy,
+                policyData
+            );
+
+            if(! _isPermissionEnabledForSmartAccount(permissionId, smartAccount)) {
+                return keccak256("Permission Not Enabled");
+            } else {
+                return permissionId;
+            }
+
+    }
+
     /***************************** Single Call Handler ***********************************/
 
     function _validateUserOpSingleExecute(
@@ -222,15 +268,25 @@ contract ERC7579PermissionsValidator is IValidator {
         //TODO Emit event
     }
 
+    function _isPermissionEnabledForSmartAccount(
+        bytes32 permissionId,
+        address smartAccount
+    ) internal view returns (bool) {
+        return 
+            enabledPermissions[permissionId][smartAccount].signatureValidationAlgorithm != address(0) 
+            || 
+            enabledPermissions[permissionId][smartAccount].policy != address(0);
+    }
+
     function _validatePermissionPreEnabled(
         address smartAccount,
-        bytes32 permissionDataDigest
+        bytes32 permissionId
     ) internal view returns (SingleSignerPermission storage permission) {
-        permission = enabledPermissions[permissionDataDigest][smartAccount];
         require(
-            permission.signatureValidationAlgorithm != address(0) || permission.policy != address(0),
+            _isPermissionEnabledForSmartAccount(permissionId, smartAccount),
             "Permissions: Permission is not enabled"
         );
+        permission = enabledPermissions[permissionId][smartAccount];
     }
 
     function _parsePermissionFromPermissionEnableData(
