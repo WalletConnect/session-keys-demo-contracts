@@ -1,0 +1,43 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getMinimalEthereumJsVm = exports.MinimalEthereumJsVmEventEmitter = void 0;
+const ethereumjs_util_1 = require("@nomicfoundation/ethereumjs-util");
+class MinimalEthereumJsVmEventEmitter extends ethereumjs_util_1.AsyncEventEmitter {
+}
+exports.MinimalEthereumJsVmEventEmitter = MinimalEthereumJsVmEventEmitter;
+function getMinimalEthereumJsVm(provider) {
+    const minimalEthereumJsVm = {
+        evm: {
+            events: new MinimalEthereumJsVmEventEmitter(),
+        },
+        stateManager: {
+            putContractCode: async (address, code) => {
+                await provider.handleRequest(JSON.stringify({
+                    method: "hardhat_setCode",
+                    params: [address.toString(), `0x${code.toString("hex")}`],
+                }));
+            },
+            getContractStorage: async (address, slotHash) => {
+                const responseObject = await provider.handleRequest(JSON.stringify({
+                    method: "eth_getStorageAt",
+                    params: [address.toString(), `0x${slotHash.toString("hex")}`],
+                }));
+                const response = JSON.parse(responseObject.json);
+                return Buffer.from(response.result.slice(2), "hex");
+            },
+            putContractStorage: async (address, slotHash, slotValue) => {
+                await provider.handleRequest(JSON.stringify({
+                    method: "hardhat_setStorageAt",
+                    params: [
+                        address.toString(),
+                        `0x${slotHash.toString("hex")}`,
+                        `0x${slotValue.toString("hex")}`,
+                    ],
+                }));
+            },
+        },
+    };
+    return minimalEthereumJsVm;
+}
+exports.getMinimalEthereumJsVm = getMinimalEthereumJsVm;
+//# sourceMappingURL=minimal-vm.js.map

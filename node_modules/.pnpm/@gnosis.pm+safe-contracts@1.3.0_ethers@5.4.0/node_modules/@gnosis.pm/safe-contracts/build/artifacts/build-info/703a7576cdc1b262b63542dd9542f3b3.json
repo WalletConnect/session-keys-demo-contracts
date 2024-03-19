@@ -1,0 +1,269 @@
+{
+  "id": "703a7576cdc1b262b63542dd9542f3b3",
+  "_format": "hh-sol-build-info-1",
+  "solcVersion": "0.5.17",
+  "solcLongVersion": "0.5.17+commit.d19bba13",
+  "input": {
+    "language": "Solidity",
+    "sources": {
+      "contracts/interfaces/ViewStorageAccessible.sol": {
+        "content": "pragma solidity >=0.5.0 <0.6.0;\n\n/// @title ViewStorageAccessible - Interface on top of StorageAccessible base class to allow simulations from view functions\n/// @notice Adjusted version of https://github.com/gnosis/util-contracts/blob/3db1e531cb243a48ea91c60a800d537c1000612a/contracts/StorageAccessible.sol\ninterface ViewStorageAccessible {\n    /**\n     * @dev Same as `simulate` on StorageAccessible. Marked as view so that it can be called from external contracts\n     * that want to run simulations from within view functions. Will revert if the invoked simulation attempts to change state.\n     */\n    function simulate(address targetContract, bytes calldata calldataPayload) external view returns (bytes memory);\n}\n"
+      }
+    },
+    "settings": {
+      "optimizer": {
+        "enabled": false,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers",
+            "metadata",
+            "devdoc",
+            "userdoc",
+            "storageLayout",
+            "evm.gasEstimates"
+          ],
+          "": [
+            "ast"
+          ]
+        }
+      },
+      "metadata": {
+        "useLiteralContent": true
+      }
+    }
+  },
+  "output": {
+    "contracts": {
+      "contracts/interfaces/ViewStorageAccessible.sol": {
+        "ViewStorageAccessible": {
+          "abi": [
+            {
+              "constant": true,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "targetContract",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "calldataPayload",
+                  "type": "bytes"
+                }
+              ],
+              "name": "simulate",
+              "outputs": [
+                {
+                  "internalType": "bytes",
+                  "name": "",
+                  "type": "bytes"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            }
+          ],
+          "devdoc": {
+            "methods": {
+              "simulate(address,bytes)": {
+                "details": "Same as `simulate` on StorageAccessible. Marked as view so that it can be called from external contracts that want to run simulations from within view functions. Will revert if the invoked simulation attempts to change state."
+              }
+            },
+            "title": "ViewStorageAccessible - Interface on top of StorageAccessible base class to allow simulations from view functions"
+          },
+          "evm": {
+            "bytecode": {
+              "linkReferences": {},
+              "object": "",
+              "opcodes": "",
+              "sourceMap": ""
+            },
+            "deployedBytecode": {
+              "linkReferences": {},
+              "object": "",
+              "opcodes": "",
+              "sourceMap": ""
+            },
+            "gasEstimates": null,
+            "methodIdentifiers": {
+              "simulate(address,bytes)": "bd61951d"
+            }
+          },
+          "metadata": "{\"compiler\":{\"version\":\"0.5.17+commit.d19bba13\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"targetContract\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"calldataPayload\",\"type\":\"bytes\"}],\"name\":\"simulate\",\"outputs\":[{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{\"simulate(address,bytes)\":{\"details\":\"Same as `simulate` on StorageAccessible. Marked as view so that it can be called from external contracts that want to run simulations from within view functions. Will revert if the invoked simulation attempts to change state.\"}},\"title\":\"ViewStorageAccessible - Interface on top of StorageAccessible base class to allow simulations from view functions\"},\"userdoc\":{\"methods\":{},\"notice\":\"Adjusted version of https://github.com/gnosis/util-contracts/blob/3db1e531cb243a48ea91c60a800d537c1000612a/contracts/StorageAccessible.sol\"}},\"settings\":{\"compilationTarget\":{\"contracts/interfaces/ViewStorageAccessible.sol\":\"ViewStorageAccessible\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"useLiteralContent\":true},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"contracts/interfaces/ViewStorageAccessible.sol\":{\"content\":\"pragma solidity >=0.5.0 <0.6.0;\\n\\n/// @title ViewStorageAccessible - Interface on top of StorageAccessible base class to allow simulations from view functions\\n/// @notice Adjusted version of https://github.com/gnosis/util-contracts/blob/3db1e531cb243a48ea91c60a800d537c1000612a/contracts/StorageAccessible.sol\\ninterface ViewStorageAccessible {\\n    /**\\n     * @dev Same as `simulate` on StorageAccessible. Marked as view so that it can be called from external contracts\\n     * that want to run simulations from within view functions. Will revert if the invoked simulation attempts to change state.\\n     */\\n    function simulate(address targetContract, bytes calldata calldataPayload) external view returns (bytes memory);\\n}\\n\",\"keccak256\":\"0xacb06455617a50b1845c3a9cf2c5c3b1706a29bca758ba2f86104b7640961f37\"}},\"version\":1}",
+          "storageLayout": {
+            "storage": [],
+            "types": null
+          },
+          "userdoc": {
+            "methods": {},
+            "notice": "Adjusted version of https://github.com/gnosis/util-contracts/blob/3db1e531cb243a48ea91c60a800d537c1000612a/contracts/StorageAccessible.sol"
+          }
+        }
+      }
+    },
+    "sources": {
+      "contracts/interfaces/ViewStorageAccessible.sol": {
+        "ast": {
+          "absolutePath": "contracts/interfaces/ViewStorageAccessible.sol",
+          "exportedSymbols": {
+            "ViewStorageAccessible": [
+              11
+            ]
+          },
+          "id": 12,
+          "nodeType": "SourceUnit",
+          "nodes": [
+            {
+              "id": 1,
+              "literals": [
+                "solidity",
+                ">=",
+                "0.5",
+                ".0",
+                "<",
+                "0.6",
+                ".0"
+              ],
+              "nodeType": "PragmaDirective",
+              "src": "0:31:0"
+            },
+            {
+              "baseContracts": [],
+              "contractDependencies": [],
+              "contractKind": "interface",
+              "documentation": "@title ViewStorageAccessible - Interface on top of StorageAccessible base class to allow simulations from view functions\n @notice Adjusted version of https://github.com/gnosis/util-contracts/blob/3db1e531cb243a48ea91c60a800d537c1000612a/contracts/StorageAccessible.sol",
+              "fullyImplemented": false,
+              "id": 11,
+              "linearizedBaseContracts": [
+                11
+              ],
+              "name": "ViewStorageAccessible",
+              "nodeType": "ContractDefinition",
+              "nodes": [
+                {
+                  "body": null,
+                  "documentation": "@dev Same as `simulate` on StorageAccessible. Marked as view so that it can be called from external contracts\nthat want to run simulations from within view functions. Will revert if the invoked simulation attempts to change state.",
+                  "id": 10,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "simulate",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 6,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 3,
+                        "name": "targetContract",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 10,
+                        "src": "626:22:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        "typeName": {
+                          "id": 2,
+                          "name": "address",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "626:7:0",
+                          "stateMutability": "nonpayable",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "value": null,
+                        "visibility": "internal"
+                      },
+                      {
+                        "constant": false,
+                        "id": 5,
+                        "name": "calldataPayload",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 10,
+                        "src": "650:30:0",
+                        "stateVariable": false,
+                        "storageLocation": "calldata",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_calldata_ptr",
+                          "typeString": "bytes"
+                        },
+                        "typeName": {
+                          "id": 4,
+                          "name": "bytes",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "650:5:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes_storage_ptr",
+                            "typeString": "bytes"
+                          }
+                        },
+                        "value": null,
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "625:56:0"
+                  },
+                  "returnParameters": {
+                    "id": 9,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 8,
+                        "name": "",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 10,
+                        "src": "705:12:0",
+                        "stateVariable": false,
+                        "storageLocation": "memory",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes_memory_ptr",
+                          "typeString": "bytes"
+                        },
+                        "typeName": {
+                          "id": 7,
+                          "name": "bytes",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "705:5:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes_storage_ptr",
+                            "typeString": "bytes"
+                          }
+                        },
+                        "value": null,
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "704:14:0"
+                  },
+                  "scope": 11,
+                  "src": "608:111:0",
+                  "stateMutability": "view",
+                  "superFunction": null,
+                  "visibility": "external"
+                }
+              ],
+              "scope": 12,
+              "src": "309:412:0"
+            }
+          ],
+          "src": "0:722:0"
+        },
+        "id": 0
+      }
+    }
+  }
+}

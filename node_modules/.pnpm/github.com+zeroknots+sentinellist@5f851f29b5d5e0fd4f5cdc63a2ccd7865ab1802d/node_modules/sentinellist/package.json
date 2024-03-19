@@ -1,0 +1,12 @@
+{
+  "name": "sentinellist",
+  "version": "1.0.0",
+  "author": "zeroknots",
+  "bugs": "https://github.com/zeroknots/sentinellist/issues",
+  "files": [
+    "src"
+  ],
+  "homepage": "https://github.com/zeroknots/sentinellist#readme",
+  "license": "MIT",
+  "repository": "github.com/zeroknots/sentinellist"
+}
