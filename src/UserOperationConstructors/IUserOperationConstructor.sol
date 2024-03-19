@@ -12,6 +12,7 @@ interface IUserOpConstructor {
 	}
 
 	function getNonceWithContext(
+		address smartAccount,
 		bytes calldata permissionsContext
 	) external view returns (uint256);
 	
@@ -20,14 +21,16 @@ interface IUserOpConstructor {
 	 * given the permissions context and the executions.
 	 */
     function getCallDataWithContext(
-    	bytes calldata permissionsContext,
-		executionObject[] calldata executions
+		address smartAccount,
+		executionObject[] calldata executions,
+    	bytes calldata permissionsContext
 	) external view returns (bytes memory);
     
     function getSignatureWithContext(
-	  bytes calldata permissionsContext,
+	  address smartAccount,
 	  PackedUserOperation calldata userOp,
-	  bytes calldata rawSignature
+	  bytes calldata rawSignature,
+	  bytes calldata permissionsContext
 	) external returns (bytes memory signature);
 
 }
