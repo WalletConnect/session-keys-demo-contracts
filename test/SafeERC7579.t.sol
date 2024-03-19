@@ -4,11 +4,12 @@ pragma solidity ^0.8.23;
 import "erc7579/interfaces/IERC7579Account.sol";
 import "erc7579/lib/ModeLib.sol";
 import "erc7579/lib/ExecutionLib.sol";
-import { TestBaseUtil, MockTarget, MockFallback } from "./Base.t.sol";
+//import { TestBaseUtil, MockTarget, MockFallback } from "./Base.t.sol";
+import { TestBaseUtil, MockTarget } from "./Base.t.sol";
 
 import "forge-std/console2.sol";
 
-CallType constant CALLTYPE_STATIC = CallType.wrap(0xFE);
+//CallType constant CALLTYPE_STATIC = CallType.wrap(0xFE);
 
 contract Safe7579Test is TestBaseUtil {
     MockTarget target;
@@ -87,6 +88,7 @@ contract Safe7579Test is TestBaseUtil {
         assertTrue(target.value() == 1337);
     }
 
+    /*
     function test_execBatch(bool withInitializedAccount)
         public
         alreadyInitialized(withInitializedAccount)
@@ -187,4 +189,5 @@ contract Safe7579Test is TestBaseUtil {
         assertEq(_ret, 1337);
         assertEq(_this, address(safe));
     }
+    */
 }

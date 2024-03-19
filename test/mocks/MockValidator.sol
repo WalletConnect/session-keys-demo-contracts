@@ -2,10 +2,9 @@
 pragma solidity ^0.8.23;
 
 import { PackedUserOperation } from "erc7579/interfaces/IERC7579Module.sol";
-import { MockValidator as MockValidatorBase } from
-    "@rhinestone/modulekit/src/mocks/MockValidator.sol";
+import { ERC7579ValidatorBase } from "../dependencies/ERC7579ValidatorBase.sol";
 
-contract MockValidator is MockValidatorBase {
+contract MockValidator is ERC7579ValidatorBase {
     function validateUserOp(
         PackedUserOperation calldata userOp,
         bytes32 userOpHash
@@ -17,5 +16,31 @@ contract MockValidator is MockValidatorBase {
         bytes4 execSelector = bytes4(userOp.callData[:4]);
 
         return VALIDATION_SUCCESS;
+    }
+
+    function onInstall(bytes calldata data) external virtual override { }
+
+    function onUninstall(bytes calldata data) external virtual override { }
+
+    function isValidSignatureWithSender(
+        address sender,
+        bytes32 hash,
+        bytes calldata data
+    )
+        external
+        view
+        virtual
+        override
+        returns (bytes4)
+    {
+        return EIP1271_SUCCESS;
+    }
+
+    function isModuleType(uint256 typeID) external pure override returns (bool) {
+        return typeID == TYPE_VALIDATOR;
+    }
+
+    function isInitialized(address smartAccount) external pure returns (bool) {
+        return false;
     }
 }

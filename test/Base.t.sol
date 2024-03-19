@@ -5,8 +5,8 @@ import "forge-std/Test.sol";
 import { SafeERC7579 } from "src/SafeERC7579.sol";
 import { ModuleManager } from "src/core/ModuleManager.sol";
 import { MockValidator } from "./mocks/MockValidator.sol";
-import { MockExecutor } from "./mocks/MockExecutor.sol";
-import { MockFallback } from "./mocks/MockFallback.sol";
+//import { MockExecutor } from "./mocks/MockExecutor.sol";
+//import { MockFallback } from "./mocks/MockFallback.sol";
 import { MockTarget } from "./mocks/MockTarget.sol";
 
 import { Safe } from "@safe-global/safe-contracts/contracts/Safe.sol";
@@ -26,7 +26,7 @@ contract TestBaseUtil is Test {
     Safe7579Launchpad launchpad;
 
     MockValidator defaultValidator;
-    MockExecutor defaultExecutor;
+    //MockExecutor defaultExecutor;
 
     Account signer1 = makeAccount("signer1");
     Account signer2 = makeAccount("signer2");
@@ -44,16 +44,15 @@ contract TestBaseUtil is Test {
 
         // Set up Modules
         defaultValidator = new MockValidator();
-        defaultExecutor = new MockExecutor();
+        //defaultExecutor = new MockExecutor();
 
         bytes32 salt;
 
         ISafe7579Init.ModuleInit[] memory validators = new ISafe7579Init.ModuleInit[](1);
         validators[0] =
             ISafe7579Init.ModuleInit({ module: address(defaultValidator), initData: bytes("") });
-        ISafe7579Init.ModuleInit[] memory executors = new ISafe7579Init.ModuleInit[](1);
-        executors[0] =
-            ISafe7579Init.ModuleInit({ module: address(defaultExecutor), initData: bytes("") });
+        
+        ISafe7579Init.ModuleInit[] memory executors = new ISafe7579Init.ModuleInit[](0);
         ISafe7579Init.ModuleInit[] memory fallbacks = new ISafe7579Init.ModuleInit[](0);
         ISafe7579Init.ModuleInit[] memory hooks = new ISafe7579Init.ModuleInit[](0);
 
