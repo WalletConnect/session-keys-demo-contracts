@@ -3,9 +3,12 @@ pragma solidity ^0.8.24;
 
 import { IModule, IValidator, VALIDATION_SUCCESS, VALIDATION_FAILED } from "erc7579/interfaces/IERC7579Module.sol";
 import { EncodedModuleTypes } from "./lib/ModuleTypeLib.sol";
+import { ISigValidationAlgorithm } from "./SigValidation/ISigValidationAlgorithm.sol";
+import { I1271SignatureValidator, EIP1271_MAGIC_VALUE } from "./interfaces/I1271SignatureValidator.sol";
 import { PackedUserOperation } from "account-abstraction/interfaces/PackedUserOperation.sol";
 import {_packValidationData} from "account-abstraction/core/Helpers.sol";
-import { ISigValidationAlgorithm } from "./SigValidation/ISigValidationAlgorithm.sol";
+import { MessageHashUtils } from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+
 
 type ValidAfter is uint48;
 type ValidUntil is uint48;
@@ -24,6 +27,7 @@ struct SingleSignerPermission {
 
 contract ERC7579PermissionsValidator is IValidator {
 
+    using MessageHashUtils for bytes32;
     mapping(bytes32 singleSignerPermissionId => mapping (address smartAccount => SingleSignerPermission)) public enabledPermissions;
 
     /// @inheritdoc IValidator
@@ -153,11 +157,12 @@ contract ERC7579PermissionsValidator is IValidator {
             // now let's use it
 
             // 1. TODO: iterate over Policies to see if none of them are violated   
+            // revert if they have been violated
+
             // pretend permissions are not violated :) 
             bool arePermissionsViolated = false;
 
-            // 2. check that it was actually signed by a proper signer (session key)
-            // revert if they have been violated
+            // check that it was actually signed by a proper signer (session key)
             ISigValidationAlgorithm(signatureValidationAlgorithm).validateSignature(
                 userOpHash,
                 signerSignature,
@@ -189,8 +194,13 @@ contract ERC7579PermissionsValidator is IValidator {
 
             // 1. TODO: iterate over Policies to see if none of them are violated    
             bool arePermissionsViolated = false;
-            // 2. check that it was actually signed by a proper signer (session key)
-            signerSignature;
+            
+            //check that it was actually signed by a proper signer (session key)
+            ISigValidationAlgorithm(permission.signatureValidationAlgorithm).validateSignature(
+                userOpHash,
+                signerSignature,
+                permission.signer
+            );
 
             rv = _packValidationData(
                 //_packValidationData expects true if sig validation has failed, false otherwise
@@ -222,6 +232,19 @@ contract ERC7579PermissionsValidator is IValidator {
         // 2. forward it to the SA.isValidSignature interface
         //    obviously we expect the SA _sessionEnableSignature to contain the info for SA to forward to the right module
         // revert if something is wrong
+        
+        // Pretend everything is signed properly atm
+
+        // Uncomment when SA is ready to it
+        
+        if ( I1271SignatureValidator(_smartAccount).isValidSignature(
+                keccak256(_sessionEnableData).toEthSignedMessageHash(), 
+                _sessionEnableSignature
+            ) != EIP1271_MAGIC_VALUE 
+        ) {
+            revert("Permissions: PermissionEnableSignatureInvalid");
+        }
+        
     }
 
     function _validatePermissionEnableTransactionAndEnablePermission(
@@ -341,7 +364,7 @@ contract ERC7579PermissionsValidator is IValidator {
          * Session Data Pre Enabled Signature Layout
          * Offset (in bytes)    | Length (in bytes) | Contents
          * 0x0                  | 0x1               | Is Session Enable Transaction Flag
-         * 0x1                  | --                | abi.encode(bytes32 sessionDataDigest, sessionKeySignature)
+         * 0x1                  | --                | abi.encode(bytes32 permissionDataDigest, sessionKeySignature)
          */
         assembly ("memory-safe") {
             let offset := add(_moduleSignature.offset, 0x1)
