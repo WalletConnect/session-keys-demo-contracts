@@ -7,11 +7,11 @@ import {
     VALIDATION_SUCCESS,
     VALIDATION_FAILED
 } from "erc7579/interfaces/IERC7579Module.sol";
-import { EncodedModuleTypes } from "./modulekit/ModuleTypeLib.sol";
+import { EncodedModuleTypes } from "../modulekit/ModuleTypeLib.sol";
 import { ISigValidationAlgorithm } from "./SigValidation/ISigValidationAlgorithm.sol";
 import {
     I1271SignatureValidator, EIP1271_MAGIC_VALUE
-} from "./interfaces/I1271SignatureValidator.sol";
+} from "../interfaces/I1271SignatureValidator.sol";
 import { PackedUserOperation } from "account-abstraction/interfaces/PackedUserOperation.sol";
 import { _packValidationData } from "account-abstraction/core/Helpers.sol";
 import { MessageHashUtils } from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
@@ -31,6 +31,12 @@ struct SingleSignerPermission {
     address policy;
     bytes policyData;
 }
+
+/**
+ * Modular Permission Validator 
+ * Heavily inspired by Biconomy Session Key Manager v2 by ankur<at>biconomy.io
+ * Ported to ERC-7579 and updated by filipp.makarov<at>biconomy.io
+ */
 
 contract ERC7579PermissionsValidator is IValidator {
     using MessageHashUtils for bytes32;
