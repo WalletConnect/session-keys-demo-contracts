@@ -7,7 +7,7 @@ import {
     VALIDATION_SUCCESS,
     VALIDATION_FAILED
 } from "erc7579/interfaces/IERC7579Module.sol";
-import { EncodedModuleTypes } from "./lib/ModuleTypeLib.sol";
+import { EncodedModuleTypes } from "./modulekit/ModuleTypeLib.sol";
 import { ISigValidationAlgorithm } from "./SigValidation/ISigValidationAlgorithm.sol";
 import {
     I1271SignatureValidator, EIP1271_MAGIC_VALUE

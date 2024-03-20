@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import { ERC7579HookDestruct } from "./ERC7579HookDestruct.sol";
+import { ERC7579HookDestruct } from "../modulekit/ERC7579HookDestruct.sol";
 import { IHookPolicy } from "./IHookPolicy.sol";
 import { SENTINEL, SentinelListLib } from "sentinellist/SentinelList.sol";
 import { Execution } from "erc7579/interfaces/IERC7579Account.sol";

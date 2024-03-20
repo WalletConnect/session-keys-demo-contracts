@@ -149,8 +149,8 @@ abstract contract ERC7579HookDestruct is ERC7579HookBase {
     //     revert HookInvalidSelector();
     // }
 
-    function postCheck(bytes calldata hookData) external override {
-        if (hookData.length == 0) return;
+    function postCheck(bytes calldata hookData) external override returns (bool success) {
+        if (hookData.length == 0) return true;
         if (onPostCheck(hookData) == false) revert();
     }
 

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import { ACCOUNT_EXEC_TYPE, ERC7579ValidatorLib } from "./ERC7579ValidatorLib.sol";
-import { ERC7579ValidatorBase } from "./ERC7579ValidatorBase.sol";
+import { ACCOUNT_EXEC_TYPE, ERC7579ValidatorLib } from "../modulekit/ERC7579ValidatorLib.sol";
+import { ERC7579ValidatorBase } from "../modulekit/ERC7579ValidatorBase.sol";
 import {
     PackedUserOperation,
     UserOperationLib

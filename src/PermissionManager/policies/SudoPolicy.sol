@@ -1,7 +1,7 @@
 pragma solidity ^0.8.0;
 
 import { IPolicy, PackedUserOperation } from "../IPolicy.sol";
-import { ERC7579ValidatorBase } from "../ERC7579ValidatorBase.sol";
+import { ERC7579ValidatorBase } from "../../modulekit/ERC7579ValidatorBase.sol";
 
 contract SudoPolicy is IPolicy {
     function registerPolicy(

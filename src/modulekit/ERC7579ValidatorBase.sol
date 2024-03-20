@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
+import { PackedUserOperation } from
+    "@ERC4337/account-abstraction/contracts/core/UserOperationLib.sol";
+
 import { _packValidationData as _packValidationData4337 } from
     "@ERC4337/account-abstraction/contracts/core/Helpers.sol";
-import { PackedUserOperation } from
-    "@ERC4337/account-abstraction/contracts/interfaces/PackedUserOperation.sol";
 import { ERC7579ModuleBase } from "./ERC7579ModuleBase.sol";
 
 abstract contract ERC7579ValidatorBase is ERC7579ModuleBase {

@@ -1,7 +1,7 @@
 pragma solidity ^0.8.0;
 
 import { ECDSA } from "solady/src/utils/ECDSA.sol";
-import { ERC7579ValidatorBase } from "../ERC7579ValidatorBase.sol";
+import { ERC7579ValidatorBase } from "../../modulekit/ERC7579ValidatorBase.sol";
 import { ISigner } from "../ISigner.sol";
 
 import "forge-std/console2.sol";

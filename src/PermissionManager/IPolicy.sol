@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 import { PackedUserOperation } from
     "@ERC4337/account-abstraction/contracts/core/UserOperationLib.sol";
 
-import { ERC7579ValidatorBase } from "./ERC7579ValidatorBase.sol";
+import { ERC7579ValidatorBase } from "../modulekit/ERC7579ValidatorBase.sol";
 
 interface IPolicy {
     function registerPolicy(

@@ -4,10 +4,10 @@ pragma solidity ^0.8.23;
 import "forge-std/Test.sol";
 import { SafeERC7579 } from "src/Safe7579Adapter/SafeERC7579.sol";
 import { ModuleManager } from "src/Safe7579Adapter/core/ModuleManager.sol";
-import { MockValidator } from "./mocks/MockValidator.sol";
+import { MockValidator } from "src/modulekit/mocks/MockValidator.sol";
 //import { MockExecutor } from "./mocks/MockExecutor.sol";
 //import { MockFallback } from "./mocks/MockFallback.sol";
-import { MockTarget } from "./mocks/MockTarget.sol";
+import { MockTarget } from "src/modulekit/mocks/MockTarget.sol";
 
 import { Safe } from "@safe-global/safe-contracts/contracts/Safe.sol";
 import { SafeProxyFactory } from
@@ -16,7 +16,7 @@ import { LibClone } from "solady/src/utils/LibClone.sol";
 import "src/Safe7579Adapter/utils/Launchpad.sol";
 
 import { Solarray } from "solarray/Solarray.sol";
-import "./dependencies/EntryPoint.sol";
+import "src/modulekit/EntryPoint.sol";
 
 contract TestBaseUtil is Test {
     SafeERC7579 safe7579;

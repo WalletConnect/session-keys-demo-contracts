@@ -2,7 +2,7 @@
 pragma solidity ^0.8.23;
 
 import { PackedUserOperation } from "erc7579/interfaces/IERC7579Module.sol";
-import { ERC7579ValidatorBase } from "../dependencies/ERC7579ValidatorBase.sol";
+import { ERC7579ValidatorBase } from "../ERC7579ValidatorBase.sol";
 
 contract MockValidator is ERC7579ValidatorBase {
     function validateUserOp(

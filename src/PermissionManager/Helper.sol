@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import { ERC7579ValidatorBase } from "./ERC7579ValidatorBase.sol";
+import { ERC7579ValidatorBase } from "../modulekit/ERC7579ValidatorBase.sol";
 
 function _intersectValidationData(
     ERC7579ValidatorBase.ValidationData a,
