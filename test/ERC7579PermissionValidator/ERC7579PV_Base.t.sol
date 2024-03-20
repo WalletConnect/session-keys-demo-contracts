@@ -2,9 +2,9 @@
 pragma solidity ^0.8.23;
 
 import "forge-std/Test.sol";
-import { SmartAccount } from "bico-sa/contracts/SmartAccount.sol";
-import { R1Validator } from "bico-sa/contracts/modules/validators/R1Validator.sol";
-import { AccountFactory } from "bico-sa/contracts/factory/AccountFactory.sol";
+import { SmartAccount } from "bico-sa/SmartAccount.sol";
+import { R1Validator } from "bico-sa/modules/validators/R1Validator.sol";
+import { AccountFactory } from "bico-sa/factory/AccountFactory.sol";
 
 import "src/modulekit/EntryPoint.sol";
 
@@ -28,7 +28,7 @@ contract ERC7579PermissionValidatorTestBaseUtil is Test {
         defaultValidator = new R1Validator();
         bicoSAFactory = new AccountFactory(address(bicoImplementation));
 
-        bytes memory initialValidatorSetupData = ethers.solidityPacked(["address"], [signer1.addr]);
+        bytes memory initialValidatorSetupData = abi.encodePacked(signer1.addr);
 
         uint256 deploymentIndex = 0;
         address bicoUserSAExpectedAddress = bicoSAFactory.getCounterFactualAddress(
@@ -36,23 +36,30 @@ contract ERC7579PermissionValidatorTestBaseUtil is Test {
             initialValidatorSetupData,
             deploymentIndex
         );
+        vm.deal(address(bicoUserSAExpectedAddress), 1 ether);
 
-        PackedUserOperation memory userOp = getDefaultUserOp(address(bicoUserSA), address(defaultValidator));
+        PackedUserOperation memory userOp = getDefaultUserOp(bicoUserSAExpectedAddress, address(defaultValidator));
         userOp.initCode = initCode(address(defaultValidator), initialValidatorSetupData, deploymentIndex);
 
-        bytes memory userOpHash = entrypoint.getUserOpHash(userOp);
-        bytes memory userOpSignature = signer1.sign(userOpHash);
+        bytes32 userOpHash = entrypoint.getUserOpHash(userOp);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(signer1.key, userOpHash);
+        bytes memory signature = abi.encodePacked(r, s, v);
+        userOp.signature = signature;
 
         // Create userOps array
         PackedUserOperation[] memory userOps = new PackedUserOperation[](1);
         userOps[0] = userOp;
 
+        //console2.log("bicoUserSAExpectedAddress: ", bicoUserSAExpectedAddress);
+
         // Send the userOp to the entrypoint
         entrypoint.handleOps(userOps, payable(address(0x69)));
 
         bicoUserSA = SmartAccount(payable(bicoUserSAExpectedAddress));
-        console2.log("bicoUserSA: ", bicoUserSA.accountId());
+    }
 
+    function test_DeploySA() public {
+        
     }
 
     function getDefaultUserOp(address sender, address validator) internal returns (PackedUserOperation memory userOp) {

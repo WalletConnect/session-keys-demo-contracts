@@ -86,15 +86,19 @@ contract BiconomyUserOpConstructor is IUserOpConstructor {
     )
         external
         view
-        returns (bytes memory signature)
+        returns (bytes memory)
     {
+        if (permissionsContext.length <= 20) {
+            return userOp.signature;
+        }
+        
         address permissionValidator = address(bytes20(permissionsContext[0:20]));
 
-        // What if permission has already been set?
         bytes32 result = IPermissionChecker(permissionValidator).checkPermissionForSmartAccount(
             smartAccount, permissionsContext[20:]
         );
 
+        bytes memory signature;
         if (result == keccak256("Permission Not Enabled")) {
             // just use the full data required to enable the permission
             signature = abi.encode(permissionsContext[20:], userOp.signature);
@@ -102,5 +106,7 @@ contract BiconomyUserOpConstructor is IUserOpConstructor {
             // just use the permissionId returned as result
             signature = abi.encode(result, userOp.signature);
         }
+        return signature;
+
     }
 }

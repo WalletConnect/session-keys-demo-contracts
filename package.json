@@ -65,7 +65,5 @@
     "test:optimized": "pnpm run build:optimized && FOUNDRY_PROFILE=test-optimized forge test"
   },
   "dependencies": {
-    "erc7579-modular-smart-account": "github:bcnmy/erc7579-modular-smart-account#feat/refactor-hardhat-tests",
-    "micro-msa": "github:erc7579/erc7579-implementation"
   }
 }

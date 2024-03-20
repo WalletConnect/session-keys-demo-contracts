@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 import "erc7579/interfaces/IERC7579Account.sol";
 import "erc7579/lib/ModeLib.sol";
 import "erc7579/lib/ExecutionLib.sol";
-import { TestBaseUtil } from "./ERC7579PV_Base.t.sol";
+import { ERC7579PermissionValidatorTestBaseUtil } from "./ERC7579PV_Base.t.sol";
 
 import "forge-std/console2.sol";
 
@@ -14,7 +14,9 @@ contract ERC7579PermissionValidatorTest is ERC7579PermissionValidatorTestBaseUti
 
     function setUp() public override {
         super.setUp();
-        
-        deal(address(bicoUserSA), 1 ether);
+    }
+
+    function test_test() public {
+        console2.log(bicoUserSA.accountId());
     }
 }

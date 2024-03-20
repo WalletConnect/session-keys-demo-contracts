@@ -13,4 +13,4 @@ solarray/=node_modules/solarray/src/
 @openzeppelin/=node_modules/@openzeppelin/
 @prb/math/=node_modules/@prb/math/
 erc4337-validation/=node_modules/erc4337-validation/src/
-bico-sa/=node_modules/erc7579-modular-smart-account/
+bico-sa/=src/test/BiconomyERC7579/
