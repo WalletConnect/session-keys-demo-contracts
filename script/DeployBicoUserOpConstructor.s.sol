@@ -10,13 +10,11 @@ contract DeployBiconomyUserOpConstructor is Script {
     BiconomyUserOpConstructor bicoUserOpConstructooor;
 
     function run() public {
-
         vm.startBroadcast();
 
-        bicoUserOpConstructooor = new BiconomyUserOpConstructor(0x0000000071727De22E5E9d8BAf0edAc6f37da032);
-        
+        bicoUserOpConstructooor =
+            new BiconomyUserOpConstructor(0x0000000071727De22E5E9d8BAf0edAc6f37da032);
+
         vm.stopBroadcast();
-
     }
-
 }

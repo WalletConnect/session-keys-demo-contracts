@@ -51,7 +51,7 @@ contract TestBaseUtil is Test {
         ISafe7579Init.ModuleInit[] memory validators = new ISafe7579Init.ModuleInit[](1);
         validators[0] =
             ISafe7579Init.ModuleInit({ module: address(defaultValidator), initData: bytes("") });
-        
+
         ISafe7579Init.ModuleInit[] memory executors = new ISafe7579Init.ModuleInit[](0);
         ISafe7579Init.ModuleInit[] memory fallbacks = new ISafe7579Init.ModuleInit[](0);
         ISafe7579Init.ModuleInit[] memory hooks = new ISafe7579Init.ModuleInit[](0);

@@ -100,8 +100,8 @@ contract Safe7579Test is TestBaseUtil {
 
         // Create the executions
         Execution[] memory executions = new Execution[](2);
-        executions[0] = Execution({ target: address(target), value: 0, callData: setValueOnTarget });
-        executions[1] = Execution({ target: address(target), value: 0, callData: setValueOnTarget });
+    executions[0] = Execution({ target: address(target), value: 0, callData: setValueOnTarget });
+    executions[1] = Execution({ target: address(target), value: 0, callData: setValueOnTarget });
 
         // Encode the call into the calldata for the userOp
         bytes memory userOpCalldata = abi.encodeCall(
@@ -140,8 +140,8 @@ contract Safe7579Test is TestBaseUtil {
         test_initializeAccount();
         bytes memory setValueOnTarget = abi.encodeCall(MockTarget.set, 1338);
         Execution[] memory executions = new Execution[](2);
-        executions[0] = Execution({ target: address(target), value: 0, callData: setValueOnTarget });
-        executions[1] = Execution({ target: address(target), value: 0, callData: setValueOnTarget });
+    executions[0] = Execution({ target: address(target), value: 0, callData: setValueOnTarget });
+    executions[1] = Execution({ target: address(target), value: 0, callData: setValueOnTarget });
         bytes[] memory ret = defaultExecutor.execBatch({
             account: IERC7579Account(address(safe)),
             execs: executions
@@ -158,7 +158,7 @@ contract Safe7579Test is TestBaseUtil {
         IERC7579Account(address(safe)).installModule(
             3, address(_fallback), abi.encode(MockFallback.target.selector, CALLTYPE_SINGLE, "")
         );
-        (uint256 ret, address msgSender, address context) = MockFallback(address(safe)).target(1337);
+    (uint256 ret, address msgSender, address context) = MockFallback(address(safe)).target(1337);
 
         assertEq(ret, 1337);
         assertEq(msgSender, address(safe));
@@ -170,7 +170,7 @@ contract Safe7579Test is TestBaseUtil {
         );
         // vm.prank(address(safe));
         // IERC7579Account(address(safe)).installModule(
-        //     3, address(_fallback), abi.encode(MockFallback.target.selector, CALLTYPE_STATIC, "")
+    //     3, address(_fallback), abi.encode(MockFallback.target.selector, CALLTYPE_STATIC, "")
         // );
         // (ret, msgSender, context) = MockFallback(address(safe)).target(1337);
         // assertEq(ret, 1337);
