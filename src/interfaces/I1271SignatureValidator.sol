@@ -17,7 +17,10 @@ interface I1271SignatureValidator {
     function isValidSignature(
         bytes32 _dataHash,
         bytes memory _signature
-    ) external view returns (bytes4);
+    )
+        external
+        view
+        returns (bytes4);
 
     /**
      * @dev Validates an EIP-1271 signature
@@ -26,7 +29,7 @@ interface I1271SignatureValidator {
      * @param moduleSignature Signature to be validated.
      * @return EIP1271_MAGIC_VALUE if signature is valid, 0xffffffff otherwise.
      */
-    
+
     /*
     function isValidSignatureUnsafe(
         bytes32 dataHash,

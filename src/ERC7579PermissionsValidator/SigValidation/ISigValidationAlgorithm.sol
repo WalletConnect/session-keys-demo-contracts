@@ -5,7 +5,12 @@ import { MessageHashUtils } from "@openzeppelin/contracts/utils/cryptography/Mes
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 interface ISigValidationAlgorithm {
-
-    function validateSignature(bytes32 dataHash, bytes memory signature, bytes calldata signer) external view returns (bool);
-    
+    function validateSignature(
+        bytes32 dataHash,
+        bytes memory signature,
+        bytes calldata signer
+    )
+        external
+        view
+        returns (bool);
 }
