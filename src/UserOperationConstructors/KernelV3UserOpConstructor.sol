@@ -157,7 +157,6 @@ contract KernelV3UserOpConstructor is IUserOpConstructor {
         bytes hookData;
         bytes selectorData;
         bytes enableSig;
-        bytes extraData;
     }
 
     function getSignatureWithContext(
@@ -194,9 +193,9 @@ contract KernelV3UserOpConstructor is IUserOpConstructor {
         } else if (deployed) { }
         MTemp memory t;
         t.hook = address(bytes20(permissionsContext[0:20]));
-        (t.validatorData, t.hookData, t.selectorData, t.enableSig, t.extraData) = //extraData will
+        (t.validatorData, t.hookData, t.selectorData, t.enableSig) = //extraData will
             // be a prefix of userOp.signature
-         abi.decode(permissionsContext[20:], (bytes, bytes, bytes, bytes, bytes));
+         abi.decode(permissionsContext[20:], (bytes, bytes, bytes, bytes));
         return abi.encodePacked(
             t.hook,
             abi.encode(
@@ -204,7 +203,7 @@ contract KernelV3UserOpConstructor is IUserOpConstructor {
                 t.hookData,
                 t.selectorData,
                 t.enableSig,
-                abi.encodePacked(t.extraData, userOp.signature)
+                userOp.signature
             )
         );
     }
