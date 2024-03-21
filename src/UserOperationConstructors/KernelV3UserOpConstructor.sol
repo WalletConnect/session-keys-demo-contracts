@@ -70,10 +70,6 @@ contract KernelV3UserOpConstructor is IUserOpConstructor {
             nonce = entryPoint.getNonce(address(smartAccount), 0);
             validationId = IKernel(smartAccount).rootValidator();
         }
-        ValidationConfig memory config = IKernel(smartAccount).validationConfig(validationId);
-        if (config.hook == address(0)) {
-            revert("not installed validator");
-        } else if (config.hook == address(1)) { }
     }
 
     function getCallDataWithContext(
