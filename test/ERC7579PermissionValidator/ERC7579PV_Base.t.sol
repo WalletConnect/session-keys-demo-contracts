@@ -6,6 +6,7 @@ import { SmartAccount } from "bico-sa/SmartAccount.sol";
 import { R1Validator } from "bico-sa/modules/validators/R1Validator.sol";
 import { AccountFactory } from "bico-sa/factory/AccountFactory.sol";
 import { ERC7579PermissionValidator } from "src/ERC7579PermissionValidator/ERC7579PermissionValidator.sol";
+import { Secp256K1SigValidationAlgorithm } from "src/ERC7579PermissionValidator/SigValidation/Secp256K1.sol";
 
 import "src/modulekit/EntryPoint.sol";
 
@@ -16,12 +17,14 @@ contract ERC7579PermissionValidatorTestBaseUtil is Test {
     R1Validator defaultValidator;
     AccountFactory bicoSAFactory;
     ERC7579PermissionValidator permissionValidator;
+    Secp256K1SigValidationAlgorithm sigValidatorAlgo;
     
 
     IEntryPoint entrypoint;
 
     Account signer1 = makeAccount("signer1");
     Account signer2 = makeAccount("signer2");
+    Account permittedSigner = makeAccount("permittedSigner");
 
     function setUp() public virtual {
 
@@ -30,6 +33,7 @@ contract ERC7579PermissionValidatorTestBaseUtil is Test {
         defaultValidator = new R1Validator();
         permissionValidator = new ERC7579PermissionValidator();
         bicoSAFactory = new AccountFactory(address(bicoImplementation));
+        sigValidatorAlgo = new Secp256K1SigValidationAlgorithm();
 
         bytes memory initialValidatorSetupData = abi.encodePacked(signer1.addr);
 

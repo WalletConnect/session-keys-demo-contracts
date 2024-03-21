@@ -4,6 +4,7 @@ out = "out"
 libs = ["lib"]
 fs_permissions = [{ access = "read", path = "out-optimized" }]
 allow_paths = ["*", "/"]
+#via-ir = true
 
 [fmt]
 bracket_spacing = true

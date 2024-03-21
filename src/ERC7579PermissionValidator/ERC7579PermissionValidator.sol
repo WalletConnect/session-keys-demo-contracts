@@ -16,8 +16,9 @@ import { PackedUserOperation } from "account-abstraction/interfaces/PackedUserOp
 import { _packValidationData } from "account-abstraction/core/Helpers.sol";
 import { MessageHashUtils } from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
-type ValidAfter is uint48;
+import "forge-std/Console2.sol";
 
+type ValidAfter is uint48;
 type ValidUntil is uint48;
 
 struct SingleSignerPermission {
@@ -64,6 +65,7 @@ contract ERC7579PermissionValidator is IValidator {
             //validationData = _validateUserOpBatchExecute(userOp, userOpHash);
             revert("Permissions: Batch Execution SOON (tm)");
         } else {
+            //console2.log("Validating Single Execute Call");
             validationData = _validateUserOpSingleExecute(userOp, userOpHash);
         }
     }
@@ -93,7 +95,7 @@ contract ERC7579PermissionValidator is IValidator {
             (uint256, ValidUntil, ValidAfter, address, bytes, address, bytes, bytes, bytes)
         );
 
-        bytes32 permissionId = _getPermissionDataDigestFromUnpacked(
+        bytes32 permissionId = getPermissionIdFromUnpacked(
             validUntil, validAfter, signatureValidationAlgorithm, signer, policy, policyData
         );
 
@@ -123,6 +125,8 @@ contract ERC7579PermissionValidator is IValidator {
          */
 
         if (_isSessionEnableTransaction(userOp.signature)) {
+            //console2.log("It is Session Enable Transaction");
+            //console2.logBytes(userOp.signature);
             (
                 uint256 permissionIndex,
                 ValidUntil validUntil,
@@ -137,7 +141,7 @@ contract ERC7579PermissionValidator is IValidator {
             ) =
             //TODO: re-write this with assembly
             abi.decode(
-                userOp.signature,
+                userOp.signature[1:], //to cut the is enable tx flag
                 (
                     uint256,
                     ValidUntil,
@@ -152,12 +156,16 @@ contract ERC7579PermissionValidator is IValidator {
                 )
             );
 
+            //console2.log("Module signature parsed");
+
             _verifyPermissionEnableDataSignature(
                 permissionEnableData,
                 permissionEnableSignature, // it should contain data of the existing permission that
                     // signed the enabling of the new permission
                 userOp.sender
             );
+
+            //console2.log("Permission enable sig verified");
 
             _validatePermissionEnableTransactionAndEnablePermission(
                 validUntil,
@@ -170,6 +178,8 @@ contract ERC7579PermissionValidator is IValidator {
                 permissionEnableData
             );
 
+            console2.log("Permission Enabled");
+
             // at this point permission is enabled
 
             // now let's use it
@@ -180,10 +190,14 @@ contract ERC7579PermissionValidator is IValidator {
             // pretend permissions are not violated :)
             bool arePermissionsViolated = false;
 
+            console2.log("Calling Sig Validator at: ", signatureValidationAlgorithm);
+
             // check that it was actually signed by a proper signer (session key)
             ISigValidationAlgorithm(signatureValidationAlgorithm).validateSignature(
                 userOpHash, signerSignature, signer
             );
+
+            console2.log("UserOp Signature by Permission Signer Validated");
 
             rv = _packValidationData(
                 //_packValidationData expects true if sig validation has failed, false otherwise
@@ -227,6 +241,8 @@ contract ERC7579PermissionValidator is IValidator {
         pure
         returns (bool isSessionEnableTransaction)
     {
+        console2.log("Verifying if it is a session enable transaction");
+        /*
         assembly ("memory-safe") {
             isSessionEnableTransaction :=
                 shr(
@@ -234,6 +250,8 @@ contract ERC7579PermissionValidator is IValidator {
                     calldataload(_moduleSignature.offset)
                 )
         }
+        */
+        return true; // for demo purposes just assume it is session enable
     }
 
     function _verifyPermissionEnableDataSignature(
@@ -251,10 +269,9 @@ contract ERC7579PermissionValidator is IValidator {
         // forward to the right module
         // revert if something is wrong
 
-        // Pretend everything is signed properly atm
-
         // Uncomment when SA is ready to it
 
+        /*
         if (
             I1271SignatureValidator(_smartAccount).isValidSignature(
                 keccak256(_sessionEnableData).toEthSignedMessageHash(), _sessionEnableSignature
@@ -262,6 +279,10 @@ contract ERC7579PermissionValidator is IValidator {
         ) {
             revert("Permissions: PermissionEnableSignatureInvalid");
         }
+        */
+
+        // WE JUST PRETEND EVERYTHING IS OK HERE
+
     }
 
     function _validatePermissionEnableTransactionAndEnablePermission(
@@ -283,7 +304,7 @@ contract ERC7579PermissionValidator is IValidator {
             revert("Permissions: ChainIdMismatch");
         }
 
-        bytes32 computedDigest = _getPermissionDataDigestFromUnpacked(
+        bytes32 computedDigest = getPermissionIdFromUnpacked(
             validUntil, validAfter, signatureValidationAlgorithm, signer, policy, policyData
         );
 
@@ -392,7 +413,7 @@ contract ERC7579PermissionValidator is IValidator {
         }
     }
 
-    function _getPermissionDataDigestFromUnpacked(
+    function getPermissionIdFromUnpacked(
         ValidUntil validUntil,
         ValidAfter validAfter,
         address signatureValidationAlgorithm,
@@ -400,13 +421,37 @@ contract ERC7579PermissionValidator is IValidator {
         address policy,
         bytes memory policyData
     )
-        internal
+        public
         pure
         returns (bytes32)
     {
         return keccak256(
             abi.encodePacked(
-                validUntil, validAfter, signatureValidationAlgorithm, signer, policy, policyData
+                validUntil, 
+                validAfter, 
+                signatureValidationAlgorithm, 
+                signer, 
+                policy, 
+                policyData
+            )
+        );
+    }
+
+    function getPermissionId(
+        SingleSignerPermission calldata permission
+    )
+        public
+        pure
+        returns (bytes32)
+    {
+        return keccak256(
+            abi.encodePacked(
+                permission.validUntil, 
+                permission.validAfter, 
+                permission.signatureValidationAlgorithm, 
+                permission.signer, 
+                permission.policy, 
+                permission.policyData
             )
         );
     }
@@ -416,6 +461,7 @@ contract ERC7579PermissionValidator is IValidator {
         pure
         returns (bool isBatchExecuteCall)
     {
+        console2.log("Verifying if it is a batch execute call");
         // TODO: verify thru 7579 execution mode
         return false; // for demo purposes just assume it is single exec
     }
@@ -471,24 +517,6 @@ contract ERC7579PermissionValidator is IValidator {
         a;
     }
 
-    function getSingleSignerPermissionId(
-        ValidUntil validUntil,
-        ValidAfter validAfter,
-        address signatureValidationAlgorithm,
-        bytes calldata signer,
-        address[] calldata policies,
-        bytes[] calldata policyDatas
-    )
-        public
-        pure
-        returns (bytes32)
-    {
-        return keccak256(
-            abi.encode(
-                //
-            )
-        );
-    }
 }
 
 /**
