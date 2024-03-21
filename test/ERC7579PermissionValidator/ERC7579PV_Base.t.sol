@@ -5,6 +5,7 @@ import "forge-std/Test.sol";
 import { SmartAccount } from "bico-sa/SmartAccount.sol";
 import { R1Validator } from "bico-sa/modules/validators/R1Validator.sol";
 import { AccountFactory } from "bico-sa/factory/AccountFactory.sol";
+import { ERC7579PermissionValidator } from "src/ERC7579PermissionValidator/ERC7579PermissionValidator.sol";
 
 import "src/modulekit/EntryPoint.sol";
 
@@ -14,6 +15,7 @@ contract ERC7579PermissionValidatorTestBaseUtil is Test {
     SmartAccount bicoUserSA;
     R1Validator defaultValidator;
     AccountFactory bicoSAFactory;
+    ERC7579PermissionValidator permissionValidator;
     
 
     IEntryPoint entrypoint;
@@ -26,6 +28,7 @@ contract ERC7579PermissionValidatorTestBaseUtil is Test {
         entrypoint = etchEntrypoint();
         bicoImplementation = new SmartAccount();
         defaultValidator = new R1Validator();
+        permissionValidator = new ERC7579PermissionValidator();
         bicoSAFactory = new AccountFactory(address(bicoImplementation));
 
         bytes memory initialValidatorSetupData = abi.encodePacked(signer1.addr);
@@ -88,9 +91,9 @@ contract ERC7579PermissionValidatorTestBaseUtil is Test {
     )
         internal
         view
-        returns (bytes memory initCode)
+        returns (bytes memory _initCode)
     {
-        initCode = abi.encodePacked(
+        _initCode = abi.encodePacked(
             address(bicoSAFactory),
             abi.encodeCall(
                 bicoSAFactory.createAccount,

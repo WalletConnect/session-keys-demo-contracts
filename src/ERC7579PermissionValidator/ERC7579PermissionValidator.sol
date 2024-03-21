@@ -32,13 +32,19 @@ struct SingleSignerPermission {
     bytes policyData;
 }
 
+/*
+  TODO: nonces
+  TODO: renounce permissions (including that is not enabled yet)
+*/
+
 /**
  * Modular Permission Validator 
  * Heavily inspired by Biconomy Session Key Manager v2 by ankur<at>biconomy.io
  * Ported to ERC-7579 and updated by filipp.makarov<at>biconomy.io
  */
 
-contract ERC7579PermissionsValidator is IValidator {
+contract ERC7579PermissionValidator is IValidator {
+    
     using MessageHashUtils for bytes32;
 
     mapping(

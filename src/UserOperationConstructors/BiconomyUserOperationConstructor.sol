@@ -9,9 +9,9 @@ import { IEntryPoint } from "account-abstraction/interfaces/IEntryPoint.sol";
 import { IERC7579Account } from "erc7579/interfaces/IERC7579Account.sol";
 
 /*
- TODO: nonces
- TODO: renounce permissions (including that is not enabled yet)
-*/
+   TODO: what if at the time of permission creation, even the permission module is
+   not yet enabled for the SA?
+   */
 
 contract BiconomyUserOpConstructor is IUserOpConstructor {
     /**
