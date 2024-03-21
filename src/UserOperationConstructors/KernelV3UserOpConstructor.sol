@@ -56,12 +56,21 @@ contract KernelV3UserOpConstructor is IUserOpConstructor {
         view
         returns (uint256 nonce)
     {
-        // this will not work with not deployed wallet
+        bool deployed = smartAccount.code.length > 0;
         bytes1 mode = bytes1(permissionsContext[0]);
         require(mode == bytes1(uint8(1)) || mode == bytes1(0)); // does not support install mode now
         bytes1 vType = bytes1(permissionsContext[1]);
         require(vType == bytes1(uint8(1)) || vType == bytes1(0)); // does not support kernel
-            // permission type now
+        if (mode == bytes1(uint8(1)) && deployed) {
+            ValidationConfig memory config =
+                IKernel(smartAccount).validationConfig(bytes21(permissionsContext[1:22]));
+            if (config.hook != address(0)) {
+                // if validator is already installed, skip enable mode
+                mode = bytes1(0);
+                // TODO: to make sure the enable mode is not trying to override, check the hook,
+                // hook data, selectorData
+            }
+        }
         bytes21 validationId;
         if (vType == bytes1(uint8(1))) {
             uint192 key = encodeAsNonceKey(mode, vType, bytes20(permissionsContext[2:22]), 0);
@@ -170,7 +179,7 @@ contract KernelV3UserOpConstructor is IUserOpConstructor {
         } else {
             permissionsContext = permissionsContext[2:];
         }
-
+        bool deployed = smartAccount.code.length > 0;
         // deal with enableData
         // userOp.signature will be userOpSig
         // enableSig
@@ -180,7 +189,7 @@ contract KernelV3UserOpConstructor is IUserOpConstructor {
         //);
         if (mode == bytes1(0)) {
             return userOp.signature;
-        }
+        } else if (deployed) { }
         MTemp memory t;
         t.hook = address(bytes20(permissionsContext[0:20]));
         (t.validatorData, t.hookData, t.selectorData, t.enableSig) =
