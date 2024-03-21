@@ -32,12 +32,14 @@ import { IEntryPoint } from "@ERC4337/account-abstraction/contracts/interfaces/I
 import { ISafe7579Init } from "./interfaces/ISafe7579Init.sol";
 import { IERC1271 } from "./interfaces/IERC1271.sol";
 
+import { console2 } from "forge-std/console2.sol";
 /**
  * @title ERC7579 Adapter for Safe accounts.
  * By using Safe's Fallback and Execution modules,
  * this contract creates full ERC7579 compliance to Safe accounts
  * @author zeroknots.eth | rhinestone.wtf
  */
+
 contract SafeERC7579 is
     ISafeOp,
     IERC7579Account,
@@ -161,13 +163,25 @@ contract SafeERC7579 is
         assembly {
             validator := shr(96, nonce)
         }
+        console2.log("validator: ", validator);
 
         // check if validator is enabled. If not, use Safe's checkSignatures()
         if (validator == address(0) || !_isValidatorInstalled(validator)) {
-            return _validateSignatures(userOp);
+            validSignature = _validateSignatures(userOp);
         } else {
+            bytes memory data = abi.encodeCall(IValidator.validateUserOp, (userOp, userOpHash));
+            (bytes memory returnData) = _executeReturnData({
+                safe: userOp.getSender(),
+                target: validator,
+                value: 0,
+                callData: data
+            });
+
+            //    ISafe(userOp.getSender()).execTransactionFromModuleReturnData(validator, 0, data,
+            // 0);
             // bubble up the return value of the validator module
-            validSignature = IValidator(validator).validateUserOp(userOp, userOpHash);
+            validSignature = abi.decode(returnData, (uint256));
+            console2.log("validation result from validator", validSignature);
         }
 
         // pay prefund
@@ -190,19 +204,27 @@ contract SafeERC7579 is
         view
         returns (uint256 validationData)
     {
+        console2.log("----- _validateSignatures");
+
         (
             bytes memory operationData,
             uint48 validAfter,
             uint48 validUntil,
             bytes calldata signatures
         ) = _getSafeOp(userOp);
+
+        console2.log("----- _getSafeOp");
+
         try ISafe(payable(userOp.getSender())).checkSignatures(
             keccak256(operationData), operationData, signatures
         ) {
+            console2.log("------ validation worked ------");
+
             // The timestamps are validated by the entry point, therefore we will not check them
             // again
             validationData = _packValidationData(false, validUntil, validAfter);
         } catch {
+            console2.log("------ validation failed ------");
             validationData = _packValidationData(true, validUntil, validAfter);
         }
     }
@@ -483,6 +505,23 @@ contract SafeERC7579 is
     function getNonce(address safe, address validator) external view returns (uint256 nonce) {
         uint192 key = uint192(bytes24(bytes20(address(validator))));
         nonce = IEntryPoint(entryPoint()).getNonce(safe, key);
+    }
+
+    /**
+     * @notice Returns the 32-byte Safe operation hash to be signed by owners for the specified
+     * ERC-4337 user operation.
+     * @dev The Safe operation timestamps are pre-pended to the signature bytes as
+     * `abi.encodePacked(validAfter, validUntil, signatures)`.
+     * @param userOp The ERC-4337 user operation.
+     * @return operationHash Operation hash.
+     */
+    function getOperationHash(PackedUserOperation calldata userOp)
+        external
+        view
+        returns (bytes32 operationHash)
+    {
+        (bytes memory operationData,,,) = _getSafeOp(userOp);
+        operationHash = keccak256(operationData);
     }
 }
 

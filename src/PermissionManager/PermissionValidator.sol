@@ -52,6 +52,14 @@ contract PermissionValidator is ERC7579ValidatorBase {
     event PermissionRevoked(address smartAccount, bytes32 permissionId);
     event NonceRevoked(address smartAccount, uint256 nonce);
 
+    function getNonce(address smartAccount) external view returns (uint128) {
+        return nonces[smartAccount].lastNonce + 1;
+    }
+
+    // function isPermission(address ) view external {
+    //     return permissions[permissionId][msg.sender].flag & toFlag(1) != toFlag(0);
+    // }
+
     function getPermissionId(
         bytes12 flag,
         ISigner signer,
@@ -202,14 +210,18 @@ contract PermissionValidator is ERC7579ValidatorBase {
         override
         returns (ValidationData validationData)
     {
+        console2.log("PermissionValidator: validateUserOp()", _userOp.sender, msg.sender);
+        console2.logBytes(_userOp.signature);
         require(_userOp.sender == msg.sender, "sender must be msg.sender");
         bytes32 permissionId = bytes32(_userOp.signature[0:32]);
         if (
             permissions[permissionId][msg.sender].flag & toFlag(1) == toFlag(0)
                 || nonces[msg.sender].revoked > permissions[permissionId][msg.sender].nonce
         ) {
+            console2.log("-------- in val 2: validation failed");
             return VALIDATION_FAILED;
         }
+        console2.log("PermissionValidator: validateUserOp() 3");
         Permission memory permission = permissions[permissionId][msg.sender];
         PolicyConfig policy = permission.firstPolicy;
         uint256 cursor = 32;
@@ -251,6 +263,16 @@ contract PermissionValidator is ERC7579ValidatorBase {
         );
         validationData = _intersectValidationData(validationData, signatureValidation);
     }
+    //         function validateUserOp(
+    //         PackedUserOperation calldata _userOp,
+    //         bytes32 _userOpHash
+    //     )
+    //         external
+    //         override
+    //         returns (ValidationData validationData)
+    //    {
+    //             return VALIDATION_SUCCESS;
+    //    }
 
     struct ValidationSigMemory {
         address caller;
@@ -340,7 +362,27 @@ contract PermissionValidator is ERC7579ValidatorBase {
         return isType == TYPE_VALIDATOR;
     }
 
-    function onInstall(bytes calldata data) external override { }
+    function onInstall(bytes calldata data) external override {
+        if (data.length == 0) {
+            return;
+        }
+
+        // registerPermission is data is not empty
+        (
+            uint128 nonce,
+            bytes12 flag,
+            ISigner signer,
+            ValidAfter validAfter,
+            ValidUntil validUntil,
+            PolicyConfig[] calldata policies,
+            bytes calldata signerData,
+            bytes[] calldata policyData
+        ) = parseData(data);
+        registerPermission(
+            nonce, flag, signer, validAfter, validUntil, policies, signerData, policyData
+        );
+    }
+
     function onUninstall(bytes calldata data) external override { }
 
     function isValidSignatureWithSender(
