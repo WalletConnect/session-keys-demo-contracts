@@ -115,7 +115,7 @@ contract KernelV3UserOpConstructor is IUserOpConstructor {
         }
         ValidationConfig memory config = IKernel(smartAccount).validationConfig(validationId);
         if (config.hook == address(0)) {
-            revert("not installed validator");
+            require(mode == bytes1(uint8(1)), "uninstalled validators has to work with enable mode");
         } else if (config.hook == address(1)) {
             return callDataWithContext;
         } else {
