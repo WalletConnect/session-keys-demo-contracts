@@ -2,7 +2,7 @@
 pragma solidity ^0.8.24;
 
 import { IUserOpConstructor, PackedUserOperation } from "./IUserOperationConstructor.sol";
-import { IPermissionChecker } from "../interfaces/IPermissionChecker.sol";
+import { IPermissionChecker } from "./IPermissionChecker.sol";
 import { ModeLib } from "erc7579/lib/ModeLib.sol";
 import { Execution, ExecutionLib } from "erc7579/lib/ExecutionLib.sol";
 import { IEntryPoint } from "account-abstraction/interfaces/IEntryPoint.sol";
