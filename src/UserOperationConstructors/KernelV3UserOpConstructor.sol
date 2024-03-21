@@ -7,6 +7,7 @@ import { ModeLib } from "erc7579/lib/ModeLib.sol";
 import { Execution, ExecutionLib } from "erc7579/lib/ExecutionLib.sol";
 import { IEntryPoint } from "account-abstraction/interfaces/IEntryPoint.sol";
 import { IERC7579Account } from "erc7579/interfaces/IERC7579Account.sol";
+import "forge-std/console.sol";
 
 struct ValidationConfig {
     uint32 nonce;
@@ -15,7 +16,7 @@ struct ValidationConfig {
 
 interface IKernel {
     function rootValidator() external view returns (bytes21);
-    function validationConfig(bytes21 vId) external view returns (ValidationConfig memory);
+    function validatorConfig(bytes21 vId) external view returns (ValidationConfig memory);
 }
 
 function getValidator(bytes21 validationId) pure returns (address v) {
@@ -63,7 +64,7 @@ contract KernelV3UserOpConstructor is IUserOpConstructor {
         require(vType == bytes1(uint8(1)) || vType == bytes1(0)); // does not support kernel
         if (mode == bytes1(uint8(1)) && deployed) {
             ValidationConfig memory config =
-                IKernel(smartAccount).validationConfig(bytes21(permissionsContext[1:22]));
+                IKernel(smartAccount).validatorConfig(bytes21(permissionsContext[1:22]));
             if (config.hook != address(0)) {
                 // if validator is already installed, skip enable mode
                 mode = bytes1(0);
@@ -124,7 +125,7 @@ contract KernelV3UserOpConstructor is IUserOpConstructor {
             );
         }
         if (deployed) {
-            ValidationConfig memory config = IKernel(smartAccount).validationConfig(validationId);
+            ValidationConfig memory config = IKernel(smartAccount).validatorConfig(validationId);
             if (config.hook == address(0)) {
                 require(
                     mode == bytes1(uint8(1)), "uninstalled validators has to work with enable mode"
