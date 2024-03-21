@@ -56,6 +56,7 @@ contract KernelV3UserOpConstructor is IUserOpConstructor {
         view
         returns (uint256 nonce)
     {
+        // this will not work with not deployed wallet
         bytes1 mode = bytes1(permissionsContext[0]);
         require(mode == bytes1(uint8(1)) || mode == bytes1(0)); // does not support install mode now
         bytes1 vType = bytes1(permissionsContext[1]);
@@ -68,7 +69,6 @@ contract KernelV3UserOpConstructor is IUserOpConstructor {
             validationId = bytes21(permissionsContext[1:22]);
         } else {
             nonce = entryPoint.getNonce(address(smartAccount), 0);
-            validationId = IKernel(smartAccount).rootValidator();
         }
     }
 
@@ -81,6 +81,7 @@ contract KernelV3UserOpConstructor is IUserOpConstructor {
         view
         returns (bytes memory callDataWithContext)
     {
+        bool deployed = smartAccount.code.length > 0;
         bytes1 mode = bytes1(permissionsContext[0]);
         require(mode == bytes1(uint8(1)) || mode == bytes1(0)); // does not support install mode now
         bytes1 vType = bytes1(permissionsContext[1]);
@@ -89,7 +90,7 @@ contract KernelV3UserOpConstructor is IUserOpConstructor {
         bytes21 validationId;
         if (vType == bytes1(uint8(1))) {
             validationId = bytes21(permissionsContext[1:22]);
-        } else {
+        } else if (deployed) {
             validationId = IKernel(smartAccount).rootValidator();
         }
         // since kernel v3 use same erc7579 execute, use same calldata
@@ -113,12 +114,29 @@ contract KernelV3UserOpConstructor is IUserOpConstructor {
                 (ModeLib.encodeSimpleBatch(), ExecutionLib.encodeBatch(executions))
             );
         }
-        ValidationConfig memory config = IKernel(smartAccount).validationConfig(validationId);
-        if (config.hook == address(0)) {
-            require(mode == bytes1(uint8(1)), "uninstalled validators has to work with enable mode");
-        } else if (config.hook == address(1)) {
+        if (deployed) {
+            ValidationConfig memory config = IKernel(smartAccount).validationConfig(validationId);
+            if (config.hook == address(0)) {
+                require(
+                    mode == bytes1(uint8(1)), "uninstalled validators has to work with enable mode"
+                );
+            } else if (config.hook == address(1)) {
+                return callDataWithContext;
+            } else {
+                return abi.encodePacked(IERC7579Account.executeUserOp.selector, callDataWithContext);
+            }
+        } else if (vType == bytes1(uint8(0))) {
+            // let's assume root validator does not require hook
             return callDataWithContext;
         } else {
+            require(
+                mode == bytes1(uint8(1)),
+                "using non-root validator with not deployed wallet should be enable mode"
+            );
+            address hook = address(bytes20(permissionsContext[0:20]));
+            if (hook == address(0) || hook == address(1)) {
+                return callDataWithContext;
+            }
             return abi.encodePacked(IERC7579Account.executeUserOp.selector, callDataWithContext);
         }
     }
@@ -150,7 +168,6 @@ contract KernelV3UserOpConstructor is IUserOpConstructor {
             permissionValidator = address(bytes20(permissionsContext[2:22]));
             permissionsContext = permissionsContext[22:];
         } else {
-            permissionValidator = getValidator(IKernel(smartAccount).rootValidator());
             permissionsContext = permissionsContext[2:];
         }
 
