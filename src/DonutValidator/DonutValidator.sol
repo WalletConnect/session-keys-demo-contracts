@@ -11,7 +11,6 @@ import "erc7579/interfaces/IERC7579Account.sol";
 import { ECDSA } from "solady/src/utils/ECDSA.sol";
 import "erc7579/lib/ExecutionLib.sol";
 import "erc7579/lib/ModeLib.sol";
-import "forge-std/console.sol";
 
 interface IDonut {
     function purchase(uint256 amount) external payable;
@@ -70,8 +69,6 @@ contract DonutValidator is IValidator {
         uint256 purchaseAmount = uint256(bytes32(data[4:36]));
         require( purchaseAmount <= policy[userOp.sender].limit, "over limit");
         policy[userOp.sender].limit -= purchaseAmount;
-        console.log("SIG");
-        console.logBytes(userOp.signature);
         address recovered = ECDSA.toEthSignedMessageHash(userOpHash).recover(userOp.signature);
         if(recovered != policy[userOp.sender].signer) {
             return 1;
