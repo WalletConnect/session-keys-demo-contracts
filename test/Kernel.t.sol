@@ -68,7 +68,8 @@ contract KernelTest is Test {
                 "newValidatorEnableData",
                 hex"",
                 abi.encodePacked(Kernel.execute.selector),
-                "enableSig"
+                "enableSig",
+                hex"" // extraData
             )
         );
         uint256 nonce = kernelConstructor.getNonceWithContext(address(kernel), permissionsContext);
