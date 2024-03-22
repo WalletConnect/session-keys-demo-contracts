@@ -18,6 +18,7 @@ contract BiconomyUserOpConstructor is IUserOpConstructor {
      *    PermissionContext is a bytes array with abi.encode:
      *    1. PermissionValidator address (20 bytes)
      *    2. PermissionData as per the Std7579PermissionsModule:
+     *         0x01
      *         uint256 permissionIndex,
      *         uint48 validUntil,
      *         uint48 validAfter,
@@ -26,8 +27,7 @@ contract BiconomyUserOpConstructor is IUserOpConstructor {
      *         address policy,
      *         bytes memory policyData,
      *         bytes memory permissionEnableData,
-     *         bytes memory permissionEnableSignature,
-     *         bytes memory signerSignature
+     *         bytes memory permissionEnableSignature
      */
     IEntryPoint public immutable entryPoint;
 

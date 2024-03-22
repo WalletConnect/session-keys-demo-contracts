@@ -9,9 +9,14 @@ import { IValidator } from "../../interfaces/modules/IValidator.sol";
 import { ERC1271_MAGICVALUE, ERC1271_INVALID } from "../../types/Constants.sol";
 import { EncodedModuleTypes } from "../../lib/ModuleTypeLib.sol";
 
-import "forge-std/Console2.sol";
+//import "forge-std/Console2.sol";
 
 contract R1Validator is IValidator {
+
+    event RecoveredAddressVsSigner(address recovered, address signer);
+    event K1SigValidatorInvalidSignature();
+    event UserOpHash(bytes32 userOpHash);
+
     using SignatureCheckerLib for address;
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -48,17 +53,32 @@ contract R1Validator is IValidator {
         PackedUserOperation calldata userOp,
         bytes32 userOpHash
     ) external view override returns (uint256) {
-        bool validSig = smartAccountOwners[userOp.sender].isValidSignatureNow(
+
+        address owner = smartAccountOwners[userOp.sender];
+        bool validSig = owner.isValidSignatureNow(
             ECDSA.toEthSignedMessageHash(userOpHash),
             userOp.signature
         );
+        /* emit UserOpHash(ECDSA.toEthSignedMessageHash(userOpHash));
+        emit RecoveredAddressVsSigner(
+            ECDSA.recover(ECDSA.toEthSignedMessageHash(userOpHash), userOp.signature),
+            owner
+        ); */
         if (!validSig) {
-            validSig = smartAccountOwners[userOp.sender].isValidSignatureNow(
+            validSig = owner.isValidSignatureNow(
                 userOpHash,
                 userOp.signature
             ); 
         }
-        if (!validSig) return VALIDATION_FAILED;
+        /* emit UserOpHash(userOpHash);
+        emit RecoveredAddressVsSigner(
+            ECDSA.recover(userOpHash, userOp.signature),
+            owner
+        ); */
+        if (!validSig) {
+            return VALIDATION_FAILED;
+            //emit K1SigValidatorInvalidSignature();
+        }
         return VALIDATION_SUCCESS;
     }
 

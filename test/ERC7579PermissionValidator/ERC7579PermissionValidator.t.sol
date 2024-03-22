@@ -146,12 +146,26 @@ contract ERC7579PermissionValidatorTest is ERC7579PermissionValidatorTestBaseUti
         address enableSignatureValidatorModule,
         Account memory enableSigDataSigner
     ) internal view returns (bytes memory, bytes memory) {
+        
         bytes32[] memory permissionIds = new bytes32[](permissions.length);
         for (uint256 i = 0; i < permissions.length; i++) {
             permissionIds[i] = permissionValidator.getPermissionId(
                 permissions[i]
             );
         }
+
+        /*
+        permissionEnableData:
+            encodePacked:
+                permissions.length (uint8)
+                chainIds[] (uint64[])
+                permissionIds[] (bytes32[])
+        
+        permissionsEnableSignature: signature on the keccak256(permissionEnableData)
+
+        */
+
+
         bytes memory permissionEnableData = abi.encodePacked(
             uint8(permissions.length)
         );
@@ -162,6 +176,7 @@ contract ERC7579PermissionValidatorTest is ERC7579PermissionValidatorTestBaseUti
             );
         }
         permissionEnableData = abi.encodePacked(permissionEnableData, permissionIds);
+        console2.logBytes(permissionEnableData);
 
         bytes32 digest = keccak256(
             abi.encodePacked(
