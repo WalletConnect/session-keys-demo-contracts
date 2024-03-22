@@ -56,10 +56,6 @@ contract PermissionValidator is ERC7579ValidatorBase {
         return nonces[smartAccount].lastNonce + 1;
     }
 
-    // function isPermission(address ) view external {
-    //     return permissions[permissionId][msg.sender].flag & toFlag(1) != toFlag(0);
-    // }
-
     function getPermissionId(
         bytes12 flag,
         ISigner signer,
