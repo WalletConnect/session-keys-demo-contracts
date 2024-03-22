@@ -32,14 +32,12 @@ import { IEntryPoint } from "@ERC4337/account-abstraction/contracts/interfaces/I
 import { ISafe7579Init } from "./interfaces/ISafe7579Init.sol";
 import { IERC1271 } from "./interfaces/IERC1271.sol";
 
-import { console2 } from "forge-std/console2.sol";
 /**
  * @title ERC7579 Adapter for Safe accounts.
  * By using Safe's Fallback and Execution modules,
  * this contract creates full ERC7579 compliance to Safe accounts
  * @author zeroknots.eth | rhinestone.wtf
  */
-
 contract SafeERC7579 is
     ISafeOp,
     IERC7579Account,
@@ -163,7 +161,6 @@ contract SafeERC7579 is
         assembly {
             validator := shr(96, nonce)
         }
-        console2.log("validator: ", validator);
 
         // check if validator is enabled. If not, use Safe's checkSignatures()
         if (validator == address(0) || !_isValidatorInstalled(validator)) {
@@ -181,7 +178,6 @@ contract SafeERC7579 is
             // 0);
             // bubble up the return value of the validator module
             validSignature = abi.decode(returnData, (uint256));
-            console2.log("validation result from validator", validSignature);
         }
 
         // pay prefund
@@ -210,7 +206,6 @@ contract SafeERC7579 is
             uint48 validUntil,
             bytes calldata signatures
         ) = _getSafeOp(userOp);
-
         try ISafe(payable(userOp.getSender())).checkSignatures(
             keccak256(operationData), operationData, signatures
         ) {

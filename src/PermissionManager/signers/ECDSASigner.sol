@@ -47,7 +47,6 @@ contract ECDSASigner is ISigner {
             signer[msg.sender][permissionId][smartAccount] != address(0),
             "ECDSASigner: smartAccount not registered"
         );
-        console2.log("----ECDSASigner----", signer[msg.sender][permissionId][smartAccount]);
         address recovered = ECDSA.toEthSignedMessageHash(userOpHash).recover(signature);
         if (recovered == signer[msg.sender][permissionId][smartAccount]) {
             return ERC7579ValidatorBase.ValidationData.wrap(0);

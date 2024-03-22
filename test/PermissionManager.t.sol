@@ -4,13 +4,10 @@ pragma solidity ^0.8.23;
 import "erc7579/interfaces/IERC7579Account.sol";
 import "erc7579/lib/ModeLib.sol";
 import "erc7579/lib/ExecutionLib.sol";
-//import { TestBaseUtil, MockTarget, MockFallback } from "./Base.t.sol";
 import { TestPermissionValidatorBaseUtil, MockTarget } from "./Base.t.sol";
 import "src/PermissionManager/PermissionValidator.sol";
 import "forge-std/console2.sol";
 import "src/PermissionManager/PolicyConfig.sol";
-
-//CallType constant CALLTYPE_STATIC = CallType.wrap(0xFE);
 
 contract PermissionValidatorTest is TestPermissionValidatorBaseUtil {
     MockTarget target;
