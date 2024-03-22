@@ -21,16 +21,12 @@ contract Secp256K1SigValidationAlgorithm is ISigValidationAlgorithm {
         returns (bool)
     {
         if(signature.length != 65) {
-            console2.log("SECP256k1 Algo Invalid signature length: ", signature.length);
             revert("Invalid signature length");
         }
 
         //address recovered = (dataHash.toEthSignedMessageHash()).recover(signature);
         address recovered = dataHash.recover(signature);
         
-        console2.log("256K1 algo: recovered: ", recovered);
-        console2.log("256K1 algo: signer: ", address(bytes20(signer[0:20])));
-
         if (address(bytes20(signer[0:20])) != recovered) {
             revert("k1 sig validator: Invalid signature");
         }

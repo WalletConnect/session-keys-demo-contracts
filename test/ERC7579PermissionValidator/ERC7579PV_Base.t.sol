@@ -57,8 +57,6 @@ contract ERC7579PermissionValidatorTestBaseUtil is Test {
         PackedUserOperation[] memory userOps = new PackedUserOperation[](1);
         userOps[0] = userOp;
 
-        //console2.log("bicoUserSAExpectedAddress: ", bicoUserSAExpectedAddress);
-
         // Send the userOp to the entrypoint
         entrypoint.handleOps(userOps, payable(address(0x69)));
 

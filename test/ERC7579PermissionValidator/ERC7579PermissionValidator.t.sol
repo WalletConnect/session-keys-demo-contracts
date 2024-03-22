@@ -92,10 +92,8 @@ contract ERC7579PermissionValidatorTest is ERC7579PermissionValidatorTestBaseUti
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(permittedSigner.key, userOpHash);
         bytes memory rawSignature = abi.encodePacked(r, s, v);
 
-        //console2.log("permittedSigner.addr: ", permittedSigner.addr);
-
         uint256 _permissionIndex = 0;
-        
+
         bytes memory moduleSignature = getPermissionValidatorSignature(
             permission,
             _permissionIndex,
@@ -117,8 +115,6 @@ contract ERC7579PermissionValidatorTest is ERC7579PermissionValidatorTestBaseUti
 
     function test_PermissionValidatorBuilder() public {
         /*
-            
-            
             1. getPermissionContext 
             2. get all the details for the userOp
             3. try to send the userOp
@@ -155,16 +151,10 @@ contract ERC7579PermissionValidatorTest is ERC7579PermissionValidatorTestBaseUti
             dummyEnableSig
         );
 
-        console2.log("permissionContext");
-        console2.logBytes(permissionContext);
-
         uint256 nonce = userOpConstructor.getNonceWithContext(
             address(bicoUserSA), 
             permissionContext
         );
-
-        console2.log("Nonce from userOpConstructor: ");
-        console2.logBytes(abi.encode(nonce));
 
         Execution[] memory executionsArray = new Execution[](1);
         executionsArray[0] = Execution({
@@ -179,9 +169,6 @@ contract ERC7579PermissionValidatorTest is ERC7579PermissionValidatorTestBaseUti
             permissionContext
         );
 
-        console2.log("callData from userOpConstructor:");
-        console2.logBytes(callData);
-
         PackedUserOperation memory userOp = getDefaultUserOp(
             address(bicoUserSA),
             address(permissionValidator)
@@ -195,7 +182,6 @@ contract ERC7579PermissionValidatorTest is ERC7579PermissionValidatorTestBaseUti
         bytes memory rawSignature = abi.encodePacked(r1, s1, v1);
         userOp.signature = rawSignature;
 
-        console2.log("getting sig with context");
         bytes memory moduleSignature = userOpConstructor.getSignatureWithContext(
             address(bicoUserSA),
             userOp,
@@ -203,8 +189,6 @@ contract ERC7579PermissionValidatorTest is ERC7579PermissionValidatorTestBaseUti
         );
 
         userOp.signature = moduleSignature;
-        console2.log("moduleSignature: ");
-        console2.logBytes(moduleSignature);
 
         // Create userOps array
         PackedUserOperation[] memory userOps = new PackedUserOperation[](1);
@@ -283,7 +267,6 @@ contract ERC7579PermissionValidatorTest is ERC7579PermissionValidatorTestBaseUti
             );
         }
         permissionEnableData = abi.encodePacked(permissionEnableData, permissionIds);
-        console2.logBytes(permissionEnableData);
 
         bytes32 digest = keccak256(
             abi.encodePacked(

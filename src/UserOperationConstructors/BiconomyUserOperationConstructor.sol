@@ -96,19 +96,10 @@ contract BiconomyUserOpConstructor is IUserOpConstructor {
         }
         
         address permissionValidator = address(bytes20(permissionsContext[0:20]));
-
-        console2.log("permission context w/o validator address: ");
-        console2.logBytes(permissionsContext[20:]);
-
         bytes32 result = IPermissionChecker(permissionValidator).checkPermissionForSmartAccount(
             smartAccount, permissionsContext[20:]
         );
-
-        console2.log("user Op constructor checked permission");
-
         bytes1 flag = bytes1(permissionsContext[0:1]);
-
-        console2.log("user Op constructor decoding permission context");
 
         (
                 uint256 permissionIndex,
@@ -125,7 +116,6 @@ contract BiconomyUserOpConstructor is IUserOpConstructor {
                     bytes
                 )
             );
-        console2.log("user Op constructor decoded permission context");
 
         if (result == keccak256("Permission Not Enabled")) {
             // just use the full data required to enable the permission
@@ -142,16 +132,8 @@ contract BiconomyUserOpConstructor is IUserOpConstructor {
                 );
         } else {
             // just use the permissionId returned as result
-            return abi.encodePacked(result, userOp.signature);
+            return abi.encode(result, userOp.signature);
         }
-
     }
 }
-
-
-/*
-00000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000
-*/
 

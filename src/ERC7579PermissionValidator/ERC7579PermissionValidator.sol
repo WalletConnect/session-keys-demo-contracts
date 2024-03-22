@@ -64,7 +64,6 @@ contract ERC7579PermissionValidator is IValidator, IERC7579PermissionValidator {
         view
         returns (bytes32 permissionPrefix)
     {
-        console2.log("validator.checkPermissions: entered ");
         (
             /*uint256 permissionIndex*/
             ,
@@ -76,8 +75,6 @@ contract ERC7579PermissionValidator is IValidator, IERC7579PermissionValidator {
             permissionDataFromContext[1:],
             (uint256, SingleSignerPermission, bytes, bytes)
         );
-
-        console2.log("validator.checkPermissions: parsed ");
 
         bytes32 permissionId = getPermissionId(permission);
 
@@ -107,8 +104,6 @@ contract ERC7579PermissionValidator is IValidator, IERC7579PermissionValidator {
          */
 
         if (_isSessionEnableTransaction(userOp.signature)) {
-            console2.log("It is Session Enable Transaction");
-            console2.logBytes(userOp.signature);
             (
                 uint256 permissionIndex,
                 SingleSignerPermission memory permission,
@@ -128,16 +123,12 @@ contract ERC7579PermissionValidator is IValidator, IERC7579PermissionValidator {
                 )
             );
 
-            console2.log("Module signature parsed");
-
             _verifyPermissionEnableDataSignature(
                 permissionEnableData,
                 permissionEnableSignature, // it should contain data of the existing permission that
                     // signed the enabling of the new permission
                 userOp.sender
             );
-
-            console2.log("Permission enable sig verified");
 
             _validatePermissionEnableTransactionAndEnablePermission(
                 permission.validUntil,
@@ -150,8 +141,6 @@ contract ERC7579PermissionValidator is IValidator, IERC7579PermissionValidator {
                 permissionEnableData
             );
 
-            console2.log("Permission Enabled");
-
             // at this point permission is enabled
 
             // now let's use it
@@ -162,19 +151,10 @@ contract ERC7579PermissionValidator is IValidator, IERC7579PermissionValidator {
             // pretend permissions are not violated :)
             bool arePermissionsViolated = false;
 
-            console2.log("Permission enable signature");
-            console2.logBytes(permissionEnableSignature);
-
-            console2.log("ECDSA permission signer signature");
-            console2.logBytes(signerSignature);
-            console2.log("Calling Sig Validator at: ", permission.signatureValidationAlgorithm);
-
             // check that it was actually signed by a proper signer (session key)
             ISigValidationAlgorithm(permission.signatureValidationAlgorithm).validateSignature(
                 userOpHash, signerSignature, permission.signer
             );
-
-            console2.log("UserOp Signature by Permission Signer Validated");
 
             rv = _packValidationData(
                 //_packValidationData expects true if sig validation has failed, false otherwise
@@ -182,7 +162,6 @@ contract ERC7579PermissionValidator is IValidator, IERC7579PermissionValidator {
                 ValidUntil.unwrap(permission.validUntil),
                 ValidAfter.unwrap(permission.validAfter)
             );
-            console2.logBytes(abi.encodePacked(rv));
         } else {
             /*
             (
@@ -219,7 +198,6 @@ contract ERC7579PermissionValidator is IValidator, IERC7579PermissionValidator {
         pure
         returns (bool isSessionEnableTransaction)
     {
-        console2.log("Verifying if it is a session enable transaction");
         /*
         assembly ("memory-safe") {
             isSessionEnableTransaction :=
@@ -278,12 +256,7 @@ contract ERC7579PermissionValidator is IValidator, IERC7579PermissionValidator {
         (uint64 permissionChainId, bytes32 permissionDigest) =
             this._parsePermissionFromPermissionEnableData(permissionEnableData, permissionIndex);
 
-        console2.logBytes(permissionEnableData);
-        console2.log(permissionChainId);
-        console2.log(block.chainid);
-
         if (permissionChainId != block.chainid) {
-            console2.log("Permissions: ChainIdMismatch");
             revert("Permissions: ChainIdMismatch");
         }
 
@@ -292,7 +265,6 @@ contract ERC7579PermissionValidator is IValidator, IERC7579PermissionValidator {
         );
 
         if (permissionDigest != computedDigest) {
-            console2.log("Permissions: PermissionDigestMismatch");
             revert("Permissions: PermissionDigestMismatch");
         }
 
@@ -445,7 +417,6 @@ contract ERC7579PermissionValidator is IValidator, IERC7579PermissionValidator {
         pure
         returns (bool isBatchExecuteCall)
     {
-        console2.log("Verifying if it is a batch execute call");
         // TODO: verify thru 7579 execution mode
         return false; // for demo purposes just assume it is single exec
     }

@@ -67,22 +67,7 @@ contract DemoPermissionContextBuilder {
             uint64(block.chainid)
         );
         
-        console2.log("Permission Enable Data:");
         permissionEnableData = abi.encodePacked(permissionEnableData, permissionIds);
-        console2.logBytes(permissionEnableData);
-
-        /* bytes memory x1 = abi.encode(
-                    uint256(0),
-                    validUntil, // validUntil hex(1742573669) => 6 bytes)
-                    validAfter, // validAfter hex(1679415269) => 6 bytes)
-                    // ENTER THE SECP256K1 ALGO ADDRESS HERE
-                    secp256k1Algo, //(20 bytes) sig validation algo
-                    signer, // from the INPUT OBJECT (20bytes)
-                    policyAddress, // this is policy address , do not use it here (20 bytes) 
-                    policyData, // (bytes) , bakery_address and limit coming from INPUT
-                    permissionEnableData,// (bytes) see below
-                    permissionEnableSig2 //(bytes) see below
-	            ); */
 
         bytes memory x1 = abi.encode(
                     uint256(0),
