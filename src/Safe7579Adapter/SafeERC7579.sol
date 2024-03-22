@@ -204,8 +204,6 @@ contract SafeERC7579 is
         view
         returns (uint256 validationData)
     {
-        console2.log("----- _validateSignatures");
-
         (
             bytes memory operationData,
             uint48 validAfter,
@@ -213,18 +211,13 @@ contract SafeERC7579 is
             bytes calldata signatures
         ) = _getSafeOp(userOp);
 
-        console2.log("----- _getSafeOp");
-
         try ISafe(payable(userOp.getSender())).checkSignatures(
             keccak256(operationData), operationData, signatures
         ) {
-            console2.log("------ validation worked ------");
-
             // The timestamps are validated by the entry point, therefore we will not check them
             // again
             validationData = _packValidationData(false, validUntil, validAfter);
         } catch {
-            console2.log("------ validation failed ------");
             validationData = _packValidationData(true, validUntil, validAfter);
         }
     }
