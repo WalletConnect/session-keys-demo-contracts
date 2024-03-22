@@ -7,6 +7,8 @@ import "erc7579/lib/ExecutionLib.sol";
 import { ERC7579PermissionValidatorTestBaseUtil } from "./ERC7579PV_Base.t.sol";
 import { SingleSignerPermission, ValidAfter, ValidUntil } from "src/ERC7579PermissionValidator/IERC7579PermissionValidator.sol";
 import { MockTarget } from "src/modulekit/mocks/MockTarget.sol";
+import { DemoPermissionContextBuilder, PermissionSigner, PermissionObjData, PermissionObj, DonutPermissionRequest } from "src/test/demoPermissionContextBuilder/permissionContextBuilder.sol";
+import { BiconomyUserOpConstructor } from "src/UserOperationConstructors/BiconomyUserOperationConstructor.sol";
 
 import "forge-std/console2.sol";
 
@@ -16,11 +18,15 @@ contract ERC7579PermissionValidatorTest is ERC7579PermissionValidatorTestBaseUti
 
     uint256 internal constant MODULE_TYPE_VALIDATOR = 1;
     MockTarget target;
+    DemoPermissionContextBuilder contextBuilder;
+    BiconomyUserOpConstructor userOpConstructor;
 
     function setUp() public override {
         super.setUp();
         enablePermissionValidator();
         target = new MockTarget();
+        contextBuilder = new DemoPermissionContextBuilder();
+        userOpConstructor = new BiconomyUserOpConstructor(address(entrypoint));
     }
 
     function test_test() public {
@@ -86,7 +92,7 @@ contract ERC7579PermissionValidatorTest is ERC7579PermissionValidatorTestBaseUti
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(permittedSigner.key, userOpHash);
         bytes memory rawSignature = abi.encodePacked(r, s, v);
 
-        console2.log("permittedSigner.addr: ", permittedSigner.addr);
+        //console2.log("permittedSigner.addr: ", permittedSigner.addr);
 
         uint256 _permissionIndex = 0;
         
@@ -106,7 +112,108 @@ contract ERC7579PermissionValidatorTest is ERC7579PermissionValidatorTestBaseUti
 
         // Send the userOp to the entrypoint
         entrypoint.handleOps(userOps, payable(address(0x69)));
-        
+        assertEq(target.value(), 777);
+    }
+
+    function test_PermissionValidatorBuilder() public {
+        /*
+            
+            
+            1. getPermissionContext 
+            2. get all the details for the userOp
+            3. try to send the userOp
+        */
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
+                signer1.key, 
+                keccak256("0x123") //should have been the enable permission data digest
+            );
+        bytes memory dummyEnableSig = abi.encodePacked(r, s, v);
+
+        PermissionObj[] memory permissionObjects = new PermissionObj[](1);
+        permissionObjects[0] = 
+                PermissionObj({
+                    permType: "purchase_donuts",
+                    permObjData: PermissionObjData({
+                        bakeryAddress: address(0x123),
+                        donutsLimit: uint256(100)
+                    }),
+                    required: true
+                });
+
+        // get the permission context
+        bytes memory permissionContext = contextBuilder.getPermissionContext(
+            DonutPermissionRequest({
+                signer: PermissionSigner({
+                    signerType: "ECDSA",
+                    pubKey: permittedSigner.addr
+                }),
+                permissionObjs: permissionObjects
+            }),
+            address(permissionValidator),
+            address(sigValidatorAlgo),
+            dummyEnableSig
+        );
+
+        console2.log("permissionContext");
+        console2.logBytes(permissionContext);
+
+        uint256 nonce = userOpConstructor.getNonceWithContext(
+            address(bicoUserSA), 
+            permissionContext
+        );
+
+        console2.log("Nonce from userOpConstructor: ");
+        console2.logBytes(abi.encode(nonce));
+
+        Execution[] memory executionsArray = new Execution[](1);
+        executionsArray[0] = Execution({
+            target: address(target),
+            value: 0,
+            callData: abi.encodeWithSignature("set(uint256)", 777)
+        });
+
+        bytes memory callData = userOpConstructor.getCallDataWithContext(
+            address(bicoUserSA),
+            executionsArray,
+            permissionContext
+        );
+
+        console2.log("callData from userOpConstructor:");
+        console2.logBytes(callData);
+
+        PackedUserOperation memory userOp = getDefaultUserOp(
+            address(bicoUserSA),
+            address(permissionValidator)
+        );
+
+        userOp.callData = callData;
+        userOp.nonce = nonce;
+
+        bytes32 userOpHash = entrypoint.getUserOpHash(userOp);
+        (uint8 v1, bytes32 r1, bytes32 s1) = vm.sign(permittedSigner.key, userOpHash);
+        bytes memory rawSignature = abi.encodePacked(r1, s1, v1);
+        userOp.signature = rawSignature;
+
+        console2.log("getting sig with context");
+        bytes memory moduleSignature = userOpConstructor.getSignatureWithContext(
+            address(bicoUserSA),
+            userOp,
+            permissionContext
+        );
+
+        userOp.signature = moduleSignature;
+        console2.log("moduleSignature: ");
+        console2.logBytes(moduleSignature);
+
+        // Create userOps array
+        PackedUserOperation[] memory userOps = new PackedUserOperation[](1);
+        userOps[0] = userOp;
+
+        // Send the userOp to the entrypoint
+        entrypoint.handleOps(userOps, payable(address(0x69)));
+        assertEq(target.value(), 777);
+
     }
 
 
@@ -186,10 +293,13 @@ contract ERC7579PermissionValidatorTest is ERC7579PermissionValidatorTestBaseUti
             )
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(enableSigDataSigner.key, digest);
+        /*
         bytes memory erc1271Signature = abi.encode(
             abi.encodePacked(r, s, v),
             enableSignatureValidatorModule
         );
+        */
+         bytes memory erc1271Signature = abi.encodePacked(r, s, v);
         return (permissionEnableData, erc1271Signature);
     }
 
@@ -217,5 +327,6 @@ contract ERC7579PermissionValidatorTest is ERC7579PermissionValidatorTestBaseUti
             )
         );
     }
-
 }
+
+

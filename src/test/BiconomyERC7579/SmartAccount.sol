@@ -38,7 +38,7 @@ contract SmartAccount is
     ) external virtual override(ERC4337Account, IERC4337Account) payPrefund(missingAccountFunds) returns (uint256) {
         address validator;
         uint256 nonce = userOp.nonce;
-        assembly {
+        assembly ("memory-safe") {
             validator := shr(96, nonce)
         }
         // check if validator is enabled. If terminate the validation phase.
@@ -296,7 +296,7 @@ contract SmartAccount is
     }
 
     function getImplementation() external view returns (address implementation) {
-        assembly {
+        assembly ("memory-safe") {
             implementation := sload(_ERC1967_IMPLEMENTATION_SLOT)
         }
     }

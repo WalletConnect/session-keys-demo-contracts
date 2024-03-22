@@ -7,6 +7,9 @@ import { ModeLib } from "erc7579/lib/ModeLib.sol";
 import { Execution, ExecutionLib } from "erc7579/lib/ExecutionLib.sol";
 import { IEntryPoint } from "account-abstraction/interfaces/IEntryPoint.sol";
 import { IERC7579Account } from "erc7579/interfaces/IERC7579Account.sol";
+import { ValidAfter, ValidUntil } from "src/ERC7579PermissionValidator/IERC7579PermissionValidator.sol";
+
+import "forge-std/Console2.sol";
 
 /*
    TODO: what if at the time of permission creation, even the permission module is
@@ -94,19 +97,77 @@ contract BiconomyUserOpConstructor is IUserOpConstructor {
         
         address permissionValidator = address(bytes20(permissionsContext[0:20]));
 
+        console2.log("permission context w/o validator address: ");
+        console2.logBytes(permissionsContext[20:]);
+
         bytes32 result = IPermissionChecker(permissionValidator).checkPermissionForSmartAccount(
             smartAccount, permissionsContext[20:]
         );
 
-        bytes memory signature;
+        console2.log("user Op constructor checked permission");
+
+        console2.log("permission context w/o validator address: ");
+        console2.logBytes(permissionsContext[20:]);
+
+        bytes1 flag = bytes1(permissionsContext[0:1]);
+        bytes memory rawSignature = userOp.signature;
+
+        (
+                uint256 permissionIndex,
+                ValidUntil validUntil,
+                ValidAfter validAfter,
+                address signatureValidationAlgorithm,
+                bytes memory signer,
+                address policy,
+                bytes memory policyData,
+                bytes memory permissionEnableData,
+                bytes memory permissionEnableSignature
+            ) =
+            abi.decode(
+                permissionsContext[1:], //to cut the is enable tx flag
+                (
+                    uint256,
+                    ValidUntil,
+                    ValidAfter,
+                    address,
+                    bytes,
+                    address,
+                    bytes,
+                    bytes,
+                    bytes
+                )
+            );
+
         if (result == keccak256("Permission Not Enabled")) {
             // just use the full data required to enable the permission
-            signature = abi.encode(permissionsContext[20:], userOp.signature);
+            return 
+                abi.encodePacked(
+                    flag,
+                    abi.encode(
+                        permissionIndex,
+                        validUntil,
+                        validAfter,
+                        signatureValidationAlgorithm,
+                        signer,
+                        policy,
+                        policyData,
+                        permissionEnableData,
+                        permissionEnableSignature,
+                        rawSignature
+                    )
+                );
         } else {
             // just use the permissionId returned as result
-            signature = abi.encode(result, userOp.signature);
+            return abi.encodePacked(result, userOp.signature);
         }
-        return signature;
 
     }
 }
+
+
+/*
+00000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000
+*/
+
