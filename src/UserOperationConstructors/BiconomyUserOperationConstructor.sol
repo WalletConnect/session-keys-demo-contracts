@@ -7,7 +7,7 @@ import { ModeLib } from "erc7579/lib/ModeLib.sol";
 import { Execution, ExecutionLib } from "erc7579/lib/ExecutionLib.sol";
 import { IEntryPoint } from "account-abstraction/interfaces/IEntryPoint.sol";
 import { IERC7579Account } from "erc7579/interfaces/IERC7579Account.sol";
-import { ValidAfter, ValidUntil } from "src/ERC7579PermissionValidator/IERC7579PermissionValidator.sol";
+import { ValidAfter, ValidUntil, SingleSignerPermission } from "src/ERC7579PermissionValidator/IERC7579PermissionValidator.sol";
 
 import "forge-std/Console2.sol";
 
@@ -106,37 +106,26 @@ contract BiconomyUserOpConstructor is IUserOpConstructor {
 
         console2.log("user Op constructor checked permission");
 
-        console2.log("permission context w/o validator address: ");
-        console2.logBytes(permissionsContext[20:]);
-
         bytes1 flag = bytes1(permissionsContext[0:1]);
-        bytes memory rawSignature = userOp.signature;
+
+        console2.log("user Op constructor decoding permission context");
 
         (
                 uint256 permissionIndex,
-                ValidUntil validUntil,
-                ValidAfter validAfter,
-                address signatureValidationAlgorithm,
-                bytes memory signer,
-                address policy,
-                bytes memory policyData,
+                SingleSignerPermission memory permission,
                 bytes memory permissionEnableData,
                 bytes memory permissionEnableSignature
             ) =
             abi.decode(
-                permissionsContext[1:], //to cut the is enable tx flag
+                permissionsContext[21:], //to cut the is enable tx flag
                 (
                     uint256,
-                    ValidUntil,
-                    ValidAfter,
-                    address,
-                    bytes,
-                    address,
-                    bytes,
+                    SingleSignerPermission,
                     bytes,
                     bytes
                 )
             );
+        console2.log("user Op constructor decoded permission context");
 
         if (result == keccak256("Permission Not Enabled")) {
             // just use the full data required to enable the permission
@@ -145,15 +134,10 @@ contract BiconomyUserOpConstructor is IUserOpConstructor {
                     flag,
                     abi.encode(
                         permissionIndex,
-                        validUntil,
-                        validAfter,
-                        signatureValidationAlgorithm,
-                        signer,
-                        policy,
-                        policyData,
+                        permission,
                         permissionEnableData,
                         permissionEnableSignature,
-                        rawSignature
+                        userOp.signature
                     )
                 );
         } else {

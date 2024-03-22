@@ -38,7 +38,7 @@ contract DemoPermissionContextBuilder {
     ) public returns (bytes memory) {
 
         uint48 validUntil = uint48(1742573669);
-        uint48 validAfter = uint48(1679415269);
+        uint48 validAfter = uint48(1);
 
         // sig validation algo
         bytes memory signer = abi.encodePacked(donutRequest.signer.pubKey);
@@ -67,10 +67,9 @@ contract DemoPermissionContextBuilder {
             uint64(block.chainid)
         );
         
+        console2.log("Permission Enable Data:");
         permissionEnableData = abi.encodePacked(permissionEnableData, permissionIds);
         console2.logBytes(permissionEnableData);
-
-        bytes memory permissionEnableSig2 = permissionEnableSignature;
 
         /* bytes memory x1 = abi.encode(
                     uint256(0),
@@ -89,7 +88,7 @@ contract DemoPermissionContextBuilder {
                     uint256(0),
                     permission,
                     permissionEnableData,// (bytes) see below
-                    permissionEnableSig2 //(bytes) see below
+                    permissionEnableSignature //(bytes) see below
 	            );
 
         

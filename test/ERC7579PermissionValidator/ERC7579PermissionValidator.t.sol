@@ -315,12 +315,7 @@ contract ERC7579PermissionValidatorTest is ERC7579PermissionValidatorTestBaseUti
             uint8(0x01),
             abi.encode(
                 _permissionIndex,
-                permission.validUntil,
-                permission.validAfter,
-                permission.signatureValidationAlgorithm,
-                permission.signer,
-                permission.policy,
-                permission.policyData,
+                permission,
                 permissionEnableData,
                 permissionEnableSignature,
                 rawSignature

@@ -68,26 +68,18 @@ contract ERC7579PermissionValidator is IValidator, IERC7579PermissionValidator {
         (
             /*uint256 permissionIndex*/
             ,
-            ValidUntil validUntil,
-            ValidAfter validAfter,
-            address signatureValidationAlgorithm,
-            bytes memory signer,
-            address policy,
-            bytes memory policyData,
+            SingleSignerPermission memory permission,
             /*bytes memory permissionEnableData*/
             ,
             /*bytes memory permissionEnableSignature*/
         ) = abi.decode(
             permissionDataFromContext[1:],
-            (uint256, ValidUntil, ValidAfter, address, bytes, address, bytes, bytes, bytes)
+            (uint256, SingleSignerPermission, bytes, bytes)
         );
 
         console2.log("validator.checkPermissions: parsed ");
 
-
-        bytes32 permissionId = getPermissionIdFromUnpacked(
-            validUntil, validAfter, signatureValidationAlgorithm, signer, policy, policyData
-        );
+        bytes32 permissionId = getPermissionId(permission);
 
         if (!_isPermissionEnabledForSmartAccount(permissionId, smartAccount)) {
             return keccak256("Permission Not Enabled");
@@ -119,12 +111,7 @@ contract ERC7579PermissionValidator is IValidator, IERC7579PermissionValidator {
             console2.logBytes(userOp.signature);
             (
                 uint256 permissionIndex,
-                ValidUntil validUntil,
-                ValidAfter validAfter,
-                address signatureValidationAlgorithm,
-                bytes memory signer,
-                address policy,
-                bytes memory policyData,
+                SingleSignerPermission memory permission,
                 bytes memory permissionEnableData,
                 bytes memory permissionEnableSignature,
                 bytes memory signerSignature
@@ -134,12 +121,7 @@ contract ERC7579PermissionValidator is IValidator, IERC7579PermissionValidator {
                 userOp.signature[1:], //to cut the is enable tx flag
                 (
                     uint256,
-                    ValidUntil,
-                    ValidAfter,
-                    address,
-                    bytes,
-                    address,
-                    bytes,
+                    SingleSignerPermission,
                     bytes,
                     bytes,
                     bytes
@@ -158,13 +140,13 @@ contract ERC7579PermissionValidator is IValidator, IERC7579PermissionValidator {
             console2.log("Permission enable sig verified");
 
             _validatePermissionEnableTransactionAndEnablePermission(
-                validUntil,
-                validAfter,
+                permission.validUntil,
+                permission.validAfter,
                 permissionIndex,
-                signatureValidationAlgorithm,
-                signer,
-                policy,
-                policyData,
+                permission.signatureValidationAlgorithm,
+                permission.signer,
+                permission.policy,
+                permission.policyData,
                 permissionEnableData
             );
 
@@ -185,11 +167,11 @@ contract ERC7579PermissionValidator is IValidator, IERC7579PermissionValidator {
 
             console2.log("ECDSA permission signer signature");
             console2.logBytes(signerSignature);
-            console2.log("Calling Sig Validator at: ", signatureValidationAlgorithm);
+            console2.log("Calling Sig Validator at: ", permission.signatureValidationAlgorithm);
 
             // check that it was actually signed by a proper signer (session key)
-            ISigValidationAlgorithm(signatureValidationAlgorithm).validateSignature(
-                userOpHash, signerSignature, signer
+            ISigValidationAlgorithm(permission.signatureValidationAlgorithm).validateSignature(
+                userOpHash, signerSignature, permission.signer
             );
 
             console2.log("UserOp Signature by Permission Signer Validated");
@@ -197,9 +179,10 @@ contract ERC7579PermissionValidator is IValidator, IERC7579PermissionValidator {
             rv = _packValidationData(
                 //_packValidationData expects true if sig validation has failed, false otherwise
                 arePermissionsViolated,
-                ValidUntil.unwrap(validUntil),
-                ValidAfter.unwrap(validAfter)
+                ValidUntil.unwrap(permission.validUntil),
+                ValidAfter.unwrap(permission.validAfter)
             );
+            console2.logBytes(abi.encodePacked(rv));
         } else {
             /*
             (
@@ -439,7 +422,7 @@ contract ERC7579PermissionValidator is IValidator, IERC7579PermissionValidator {
     }
 
     function getPermissionId(
-        SingleSignerPermission calldata permission
+        SingleSignerPermission memory permission
     )
         public
         pure
