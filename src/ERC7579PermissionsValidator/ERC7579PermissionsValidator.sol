@@ -130,7 +130,7 @@ contract ERC7579PermissionsValidator is IValidator {
             ) =
             //TODO: re-write this with assembly
             abi.decode(
-                userOp.signature,
+                userOp.signature[1:],
                 (
                     uint256,
                     ValidUntil,
@@ -193,7 +193,7 @@ contract ERC7579PermissionsValidator is IValidator {
             */
             // just doing it with abi.decode for consistency
             (bytes32 permissionDataDigest_, bytes memory signerSignature) =
-                abi.decode(userOp.signature, (bytes32, bytes));
+                abi.decode(userOp.signature[1:], (bytes32, bytes));
 
             SingleSignerPermission storage permission =
                 _validatePermissionPreEnabled(userOp.sender, permissionDataDigest_);
@@ -247,7 +247,6 @@ contract ERC7579PermissionsValidator is IValidator {
         // Pretend everything is signed properly atm
 
         // Uncomment when SA is ready to it
-
         if (
             I1271SignatureValidator(_smartAccount).isValidSignature(
                 keccak256(_sessionEnableData).toEthSignedMessageHash(), _sessionEnableSignature
@@ -335,7 +334,6 @@ contract ERC7579PermissionsValidator is IValidator {
         returns (uint64 permissionChainId, bytes32 permissionDigest)
     {
         uint8 enabledPermissionsCount;
-
         /*
          * Session Enable Data Layout
          * Offset (in bytes)    | Length (in bytes) | Contents

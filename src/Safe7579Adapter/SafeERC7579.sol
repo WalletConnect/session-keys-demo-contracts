@@ -164,10 +164,20 @@ contract SafeERC7579 is
 
         // check if validator is enabled. If not, use Safe's checkSignatures()
         if (validator == address(0) || !_isValidatorInstalled(validator)) {
-            return _validateSignatures(userOp);
+            validSignature = _validateSignatures(userOp);
         } else {
+            bytes memory data = abi.encodeCall(IValidator.validateUserOp, (userOp, userOpHash));
+            (bytes memory returnData) = _executeReturnData({
+                safe: userOp.getSender(),
+                target: validator,
+                value: 0,
+                callData: data
+            });
+
+            //    ISafe(userOp.getSender()).execTransactionFromModuleReturnData(validator, 0, data,
+            // 0);
             // bubble up the return value of the validator module
-            validSignature = IValidator(validator).validateUserOp(userOp, userOpHash);
+            validSignature = abi.decode(returnData, (uint256));
         }
 
         // pay prefund
@@ -483,6 +493,23 @@ contract SafeERC7579 is
     function getNonce(address safe, address validator) external view returns (uint256 nonce) {
         uint192 key = uint192(bytes24(bytes20(address(validator))));
         nonce = IEntryPoint(entryPoint()).getNonce(safe, key);
+    }
+
+    /**
+     * @notice Returns the 32-byte Safe operation hash to be signed by owners for the specified
+     * ERC-4337 user operation.
+     * @dev The Safe operation timestamps are pre-pended to the signature bytes as
+     * `abi.encodePacked(validAfter, validUntil, signatures)`.
+     * @param userOp The ERC-4337 user operation.
+     * @return operationHash Operation hash.
+     */
+    function getOperationHash(PackedUserOperation calldata userOp)
+        external
+        view
+        returns (bytes32 operationHash)
+    {
+        (bytes memory operationData,,,) = _getSafeOp(userOp);
+        operationHash = keccak256(operationData);
     }
 }
 

@@ -52,6 +52,10 @@ contract PermissionValidator is ERC7579ValidatorBase {
     event PermissionRevoked(address smartAccount, bytes32 permissionId);
     event NonceRevoked(address smartAccount, uint256 nonce);
 
+    function getNonce(address smartAccount) external view returns (uint128) {
+        return nonces[smartAccount].lastNonce + 1;
+    }
+
     function getPermissionId(
         bytes12 flag,
         ISigner signer,
@@ -341,6 +345,7 @@ contract PermissionValidator is ERC7579ValidatorBase {
     }
 
     function onInstall(bytes calldata data) external override { }
+
     function onUninstall(bytes calldata data) external override { }
 
     function isValidSignatureWithSender(
