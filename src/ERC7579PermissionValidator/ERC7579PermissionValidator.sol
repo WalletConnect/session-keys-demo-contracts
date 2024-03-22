@@ -15,23 +15,9 @@ import {
 import { PackedUserOperation } from "account-abstraction/interfaces/PackedUserOperation.sol";
 import { _packValidationData } from "account-abstraction/core/Helpers.sol";
 import { MessageHashUtils } from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+import { IERC7579PermissionValidator, SingleSignerPermission, ValidAfter, ValidUntil } from "./IERC7579PermissionValidator.sol";
 
 import "forge-std/Console2.sol";
-
-type ValidAfter is uint48;
-type ValidUntil is uint48;
-
-struct SingleSignerPermission {
-    ValidUntil validUntil;
-    ValidAfter validAfter;
-    address signatureValidationAlgorithm;
-    bytes signer;
-    // TODO: change it to address[] and bytes[] to be able to
-    // stack policies for a permission
-    // as of now it is enough to have a single policy for demo purposes
-    address policy;
-    bytes policyData;
-}
 
 /*
   TODO: nonces
@@ -44,7 +30,7 @@ struct SingleSignerPermission {
  * Ported to ERC-7579 and updated by filipp.makarov<at>biconomy.io
  */
 
-contract ERC7579PermissionValidator is IValidator {
+contract ERC7579PermissionValidator is IValidator, IERC7579PermissionValidator {
     
     using MessageHashUtils for bytes32;
 

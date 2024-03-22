@@ -5,7 +5,7 @@ import "erc7579/interfaces/IERC7579Account.sol";
 import "erc7579/lib/ModeLib.sol";
 import "erc7579/lib/ExecutionLib.sol";
 import { ERC7579PermissionValidatorTestBaseUtil } from "./ERC7579PV_Base.t.sol";
-import { SingleSignerPermission, ValidAfter, ValidUntil } from "src/ERC7579PermissionValidator/ERC7579PermissionValidator.sol";
+import { SingleSignerPermission, ValidAfter, ValidUntil } from "src/ERC7579PermissionValidator/IERC7579PermissionValidator.sol";
 import { MockTarget } from "src/modulekit/mocks/MockTarget.sol";
 
 import "forge-std/console2.sol";
