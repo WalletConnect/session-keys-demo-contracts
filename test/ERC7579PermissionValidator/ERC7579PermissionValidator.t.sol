@@ -113,7 +113,7 @@ contract ERC7579PermissionValidatorTest is ERC7579PermissionValidatorTestBaseUti
         assertEq(target.value(), 777);
     }
 
-    function test_PermissionValidatorBuilder() public {
+    function test_PermissionContextBuilder() public {
         /*
             1. getPermissionContext 
             2. get all the details for the userOp
@@ -295,7 +295,7 @@ contract ERC7579PermissionValidatorTest is ERC7579PermissionValidatorTestBaseUti
     ) internal view returns (bytes memory) {
         return 
         abi.encodePacked(
-            uint8(0x01),
+            uint8(0x01), //enable tx flag
             abi.encode(
                 _permissionIndex,
                 permission,

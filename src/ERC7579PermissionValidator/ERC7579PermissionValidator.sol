@@ -113,7 +113,7 @@ contract ERC7579PermissionValidator is IValidator, IERC7579PermissionValidator {
             ) =
             //TODO: re-write this with assembly
             abi.decode(
-                userOp.signature[1:], //to cut the is enable tx flag
+                userOp.signature[1:], //to cut the isEnableTx flag
                 (
                     uint256,
                     SingleSignerPermission,
@@ -197,17 +197,16 @@ contract ERC7579PermissionValidator is IValidator, IERC7579PermissionValidator {
         internal
         pure
         returns (bool isSessionEnableTransaction)
-    {
-        /*
+
+    {   
+        // assembly way of getting the firt byte of the _moduleSignature
         assembly ("memory-safe") {
             isSessionEnableTransaction :=
                 shr(
-                    248, // TODO: CHECK THIS, REPLACE WITH CONSTANT
+                    248, // shift right 248 bits (31 byte) = append 62 0s to the left in the hex notation of the 32bytes word
                     calldataload(_moduleSignature.offset)
                 )
         }
-        */
-        return true; // for demo purposes just assume it is session enable
     }
 
     function _verifyPermissionEnableDataSignature(
