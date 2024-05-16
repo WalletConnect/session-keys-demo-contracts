@@ -66,10 +66,8 @@ contract ERC7579PermissionValidatorTest is ERC7579PermissionValidatorTestBaseUti
             permissions, 
             address(bicoUserSA),
             address(defaultValidator),
-            permittedSigner
+            signer1 //current admin/owner of the SA
         );
-
-        //console2.logBytes(permissionEnableData);
 
         PackedUserOperation memory enableAndUsePermissionUserOp = getDefaultUserOp(
             address(bicoUserSA),
@@ -77,13 +75,13 @@ contract ERC7579PermissionValidatorTest is ERC7579PermissionValidatorTestBaseUti
         );
 
         // Create calldata for the account to execute
-        bytes memory setValueOnTarget = abi.encodeCall(MockTarget.set, 777);
+        bytes memory setValueOnTargetCallData = abi.encodeCall(MockTarget.set, 777);
         // Encode the call into the calldata for the userOp
         bytes memory userOpCalldata = abi.encodeCall(
             IERC7579Account.execute,
             (
                 ModeLib.encodeSimpleSingle(),
-                ExecutionLib.encodeSingle(address(target), uint256(0), setValueOnTarget)
+                ExecutionLib.encodeSingle(address(target), uint256(0), setValueOnTargetCallData)
             )
         );
         enableAndUsePermissionUserOp.callData = userOpCalldata;
@@ -113,18 +111,21 @@ contract ERC7579PermissionValidatorTest is ERC7579PermissionValidatorTestBaseUti
         assertEq(target.value(), 777);
     }
 
-    function test_PermissionContextBuilder() public {
-        /*
-            1. getPermissionContext 
-            2. get all the details for the userOp
-            3. try to send the userOp
-        */
+    /*
+
+    function test_PermissionContextBuilderAndUserOpBuilder() public {
+        
+         //   1. getPermissionContext 
+         //   2. get all the details for the userOp
+         //   3. try to send the userOp
+        
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
                 signer1.key, 
                 keccak256("0x123") //should have been the enable permission data digest
             );
-        bytes memory dummyEnableSig = abi.encodePacked(r, s, v);
+        bytes memory dummyEnablePermissionSig = abi.encodePacked(r, s, v);
+        // todo: add address of the module that validates enablePermissionSig
 
         PermissionObj[] memory permissionObjects = new PermissionObj[](1);
         permissionObjects[0] = 
@@ -148,7 +149,7 @@ contract ERC7579PermissionValidatorTest is ERC7579PermissionValidatorTestBaseUti
             }),
             address(permissionValidator),
             address(sigValidatorAlgo),
-            dummyEnableSig
+            dummyEnablePermissionSig
         );
 
         uint256 nonce = userOpConstructor.getNonceWithContext(
@@ -199,7 +200,7 @@ contract ERC7579PermissionValidatorTest is ERC7579PermissionValidatorTestBaseUti
         assertEq(target.value(), 777);
 
     }
-
+    */
 
     function enablePermissionValidator() public {
         PackedUserOperation memory userOp = getDefaultUserOp(
@@ -236,7 +237,7 @@ contract ERC7579PermissionValidatorTest is ERC7579PermissionValidatorTestBaseUti
         address smartAccount,
         address enableSignatureValidatorModule,
         Account memory enableSigDataSigner
-    ) internal view returns (bytes memory, bytes memory) {
+    ) internal view returns (bytes memory permissionEnableData, bytes memory permissionEnableSignature) {
         
         bytes32[] memory permissionIds = new bytes32[](permissions.length);
         for (uint256 i = 0; i < permissions.length; i++) {
@@ -252,8 +253,7 @@ contract ERC7579PermissionValidatorTest is ERC7579PermissionValidatorTestBaseUti
                 chainIds[] (uint64[])
                 permissionIds[] (bytes32[])
         
-        permissionsEnableSignature: signature on the keccak256(permissionEnableData)
-
+        permissionsEnableSignature: signature on the keccak256(permissionEnableData)+sa.address 
         */
 
 
@@ -268,6 +268,7 @@ contract ERC7579PermissionValidatorTest is ERC7579PermissionValidatorTestBaseUti
         }
         permissionEnableData = abi.encodePacked(permissionEnableData, permissionIds);
 
+        //prepare the hash according to the validator rules.
         bytes32 digest = keccak256(
             abi.encodePacked(
                 "\x19Ethereum Signed Message:\n52",
@@ -276,14 +277,11 @@ contract ERC7579PermissionValidatorTest is ERC7579PermissionValidatorTestBaseUti
             )
         );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(enableSigDataSigner.key, digest);
-        /*
-        bytes memory erc1271Signature = abi.encode(
-            abi.encodePacked(r, s, v),
-            enableSignatureValidatorModule
+        bytes memory erc1271SignatureWithValidatorAddress = abi.encodePacked(
+            enableSignatureValidatorModule,
+            abi.encodePacked(r, s, v)
         );
-        */
-         bytes memory erc1271Signature = abi.encodePacked(r, s, v);
-        return (permissionEnableData, erc1271Signature);
+        return (permissionEnableData, erc1271SignatureWithValidatorAddress);
     }
 
     function getPermissionValidatorSignature(

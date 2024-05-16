@@ -9,7 +9,7 @@ import { IValidator } from "../../interfaces/modules/IValidator.sol";
 import { ERC1271_MAGICVALUE, ERC1271_INVALID } from "../../types/Constants.sol";
 import { EncodedModuleTypes } from "../../lib/ModuleTypeLib.sol";
 
-//import "forge-std/Console2.sol";
+import "forge-std/Console2.sol";
 
 contract R1Validator is IValidator {
 
@@ -83,11 +83,19 @@ contract R1Validator is IValidator {
     }
 
     function isValidSignatureWithSender(
-        address,
+        address sender,
         bytes32 hash,
         bytes calldata data
     ) external view override returns (bytes4) {
-        address owner = smartAccountOwners[msg.sender];
+        address owner = smartAccountOwners[sender];
+        // use the simple 1271 replay protection
+        hash = keccak256(
+                    abi.encodePacked(
+                        "\x19Ethereum Signed Message:\n52",
+                        hash,
+                        sender
+                    )
+                );
         return
             SignatureCheckerLib.isValidSignatureNowCalldata(owner, hash, data) ? ERC1271_MAGICVALUE : ERC1271_INVALID;
     }

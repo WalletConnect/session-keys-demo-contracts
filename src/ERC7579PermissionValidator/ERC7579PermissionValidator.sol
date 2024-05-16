@@ -123,10 +123,26 @@ contract ERC7579PermissionValidator is IValidator, IERC7579PermissionValidator {
                 )
             );
 
+
+            // we probably need to prepare the proper 1271+712 hash out of permission
+            // so we either have to pass the permission to the method 
+            
+            // or 
+            // 1) prepare the hash in a separate function 
+            // using chainIds from permissionEnableData and permission info from permission object
+            // (permission info to show, but it will be hashed to be used in form of permissionId in the permissionEnableData)
+            // If we consider this being used through eth_requestPermissions only, that would be much easier as it would not
+            // require eip-712 here, just a blind hash to be signed
+            // but since we do not know how it is used, maybe there will be just signTypedData so we want to provide the 
+            // info about permissions. Other way would be not bothering and just make user sign blind hash in all cases 
+            // except eth_requestPermissions flow
+            // and
+            // 2) just call smartAccount.isValidSignature and handle the result
+
+            // todo: make the simple version w/o eip-712 and discuss on Friday
             _verifyPermissionEnableDataSignature(
                 permissionEnableData,
-                permissionEnableSignature, // it should contain data of the existing permission that
-                    // signed the enabling of the new permission
+                permissionEnableSignature,
                 userOp.sender
             );
 
@@ -210,34 +226,40 @@ contract ERC7579PermissionValidator is IValidator, IERC7579PermissionValidator {
     }
 
     function _verifyPermissionEnableDataSignature(
-        bytes memory _sessionEnableData,
-        bytes memory _sessionEnableSignature,
+        bytes memory _permissionEnableData,
+        bytes memory _permissionEnableSignature,
         address _smartAccount
     )
         internal
         view
     {
         // Verify the signature on the session enable data
-        // 1. get the _sessionEnableData digest that was signed
+
+        // 1. create the _permissionEnableData digest that was signed (child hash). 
+        // further formatting (child hash => final hash)
+        // to match the 1271 implementation of the exact validator will happen in the validator
+        // For the eth_requestPermissions flow it will be enough to user personal_sign as permission
+        // parameters are sent in the RPC request and wallet will be able to show it to the user
+        // when requesting the signature over the final hash
+        // For other flow, eth_signTypedData should be used and the final hash should be prepared as per
+        // latest 1271+712 flow that features replay protection and all the data is provided to be shown to user
+        // In both cases, childHash => finalHash conversion is executed by the validator
+
         // 2. forward it to the SA.isValidSignature interface
-        //    obviously we expect the SA _sessionEnableSignature to contain the info for SA to
+        // obviously we expect the SA _sessionEnableSignature to contain the info for SA to
         // forward to the right module
+        // In any case, Nexus needs a data about the validator to process 1271 signs,
+        // so it should be just a regular 1271 sig formatted in a way expected by Nexus
         // revert if something is wrong
 
-        // Uncomment when SA is ready to it
-
-        /*
         if (
             I1271SignatureValidator(_smartAccount).isValidSignature(
-                keccak256(_sessionEnableData).toEthSignedMessageHash(), _sessionEnableSignature
+                keccak256(_permissionEnableData), //the hash will be properly formatted in the validator
+                _permissionEnableSignature
             ) != EIP1271_MAGIC_VALUE
         ) {
             revert("Permissions: PermissionEnableSignatureInvalid");
         }
-        */
-
-        // WE JUST PRETEND EVERYTHING IS OK HERE
-
     }
 
     function _validatePermissionEnableTransactionAndEnablePermission(
@@ -311,7 +333,7 @@ contract ERC7579PermissionValidator is IValidator, IERC7579PermissionValidator {
         bytes calldata _permissionEnableData,
         uint256 _permissionIndex
     )
-        // TODO: change public to internal when initial decoding is done via assembly
+        // TODO: change public to external when initial decoding is done via assembly
         // so we do not need to use this._parsePermissionFromPermissionEnableData
         public
         pure
@@ -472,10 +494,3 @@ contract ERC7579PermissionValidator is IValidator, IERC7579PermissionValidator {
     }
 
 }
-
-/**
- * TODO:
- *
- * [ ] add simple ecdsa algorithm contract
- * [ ] add erc721 token policy contract (whatever is required for demo dapp)
- */

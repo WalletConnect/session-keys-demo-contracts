@@ -14,6 +14,8 @@ import { ModeLib, ModeCode, ExecType, CallType, CALLTYPE_BATCH, CALLTYPE_SINGLE,
 import { ExecLib } from "./lib/ExecLib.sol";
 import { PackedUserOperation } from "account-abstraction/interfaces/PackedUserOperation.sol";
 
+import "forge-std/Console2.sol";
+
 contract SmartAccount is
     AccountConfig,
     AccountExecution,
@@ -292,7 +294,7 @@ contract SmartAccount is
     function isValidSignature(bytes32 hash, bytes calldata data) external view virtual override returns (bytes4) {
         address validator = address(bytes20(data[0:20]));
         if (!_isValidatorInstalled(validator)) revert InvalidModule(validator);
-        return IValidator(validator).isValidSignatureWithSender(msg.sender, hash, data[20:]);
+        return IValidator(validator).isValidSignatureWithSender(address(this), hash, data[20:]);
     }
 
     function getImplementation() external view returns (address implementation) {
